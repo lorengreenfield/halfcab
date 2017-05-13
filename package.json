@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Yet another JS data binding library using components, but spinning 180° and going back to the easy way of doing things instead of trying to ride fakie all the time to show off.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "rollup src/index.js --format cjs --output index.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
-    "publish": "npm run build && npm publish"
+    "build-publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
