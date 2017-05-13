@@ -1,28 +1,20 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var observer = _interopDefault(require('@nx-js/observer-util'));
-var sheetRouter = _interopDefault(require('sheet-router'));
-var href = _interopDefault(require('sheet-router/href'));
-var html = require('yo-yo');
-var html__default = _interopDefault(html);
-
+import observer from '@nx-js/observer-util';
+import sheetRouter from 'sheet-router';
+import href from 'sheet-router/href';
+import html, {update} from 'yo-yo';
 var routesArray = [];
 
 var store = observer.observable({});
 
 function routes(config){
 
-    observer.observe(() => html.update(config.rootComponent, config.components()));
+    observer.observe(() => update(config.rootComponent, config.components()));
 
     var routesFormatted = routesArray.map(route => [
         route.path,
         (params) =>{
             route.callback(params);
-            html.update(config.rootComponent, config.components());
+            update(config.rootComponent, config.components());
             if(window.location.pathname !== route.path){
                 window.history.pushState({path: route.path}, route.title, route.path);
                 document.title = route.path !== '' ? `${config.baseName} - ${route.title}`: config.baseName;
@@ -54,20 +46,15 @@ function emptyBody(){
     }
 }
 
-var index = function(){
+export default function(){
     console.log('initiated halfcab');
     return {
-        html: html__default,
+        html,
         routes,
         route,
         store,
         emptyBody
     }
-};
+}
 
-exports['default'] = index;
-exports.html = html__default;
-exports.routes = routes;
-exports.route = route;
-exports.store = store;
-exports.emptyBody = emptyBody;
+export {html, routes, route, store, emptyBody};
