@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Yet another JS data binding library using components, but spinning 180° and going back to the easy way of doing things instead of trying to ride fakie all the time to show off.",
   "main": "index.js",
   "scripts": {
@@ -24,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/lorengreenfield/halfcab/issues"
   },
-  "homepage": "https://github.com/lorengreenfield/halfcab#readme"
+  "homepage": "https://github.com/lorengreenfield/halfcab#readme",
+  "devDependencies": {
+    "@nx-js/observer-util": "^2.0.0",
+    "sheet-router": "^4.2.3",
+    "yo-yo": "^1.4.0"
+  }
 }
