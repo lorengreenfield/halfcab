@@ -7,7 +7,8 @@
     "test": "mocha **/test.js",
     "build": "rollup src/index.js --format cjs --output index.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
-    "versionbump:feature": "npm version minor --no-git-tag-version"
+    "versionbump:feature": "npm version minor --no-git-tag-version",
+    "publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
