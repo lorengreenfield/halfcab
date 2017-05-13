@@ -54,14 +54,21 @@ function emptyBody(){
     }
 }
 
+function formField(ob, prop){
+
+    return function(e){
+        ob[prop] = e.currentTarget.value;
+    }
+}
+
 var index = function(){
-    console.log('initiated halfcab');
     return {
         html: html__default,
         routes,
         route,
         store,
-        emptyBody
+        emptyBody,
+        formField
     }
 };
 
@@ -71,3 +78,4 @@ exports.routes = routes;
 exports.route = route;
 exports.store = store;
 exports.emptyBody = emptyBody;
+exports.formField = formField;
