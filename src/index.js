@@ -5,7 +5,7 @@ import html, {update} from 'yo-yo';
 import { get } from 'axios';
 var routesArray = [];
 var baseApiPath = '';
-var store;
+var store = { NOTICE: 'Store object within halfcab should not be used server-side. It\'s only for client-side.' };
 
 
 
@@ -28,25 +28,24 @@ function formField(ob, prop){
 
 
 export default function (config){
-
-    store = observer.observable(config.store || {});
-
+    //this default function is used for setting up client side and is not run on the server
+    store = observer.observable({});
     baseApiPath = config.baseApiPath || '';
     observer.observe(() => update(config.rootComponent, config.components()));
 
-    var routesFormatted = routesArray.map(route => [
-        route.path,
+    var routesFormatted = routesArray.map(r => [
+        r.path,
         (params) =>{
 
             //get data that the route needs first
             get(`${baseApiPath}${config.path}`)
                 .then(data => {
                     config.data = data.data;
-                    route.callback(params);
-                    update(config.rootComponent, config.components());
-                    if(window.location.pathname !== route.path){
-                        window.history.pushState({path: route.path}, route.title, route.path);
-                        document.title = route.path !== '' ? `${config.baseName} - ${route.title}`: config.baseName;
+                    r.callback(params);
+                    update(config.rootComponent, config.components(store));
+                    if(window.location.pathname !== r.path){
+                        window.history.pushState({path: r.path}, r.title, r.path);
+                        document.title = r.path !== '' ? `${config.baseName} - ${r.title}`: config.baseName;
                     }
                 })
                 .catch(err => {
