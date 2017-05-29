@@ -1,13 +1,21 @@
 import observer from '@nx-js/observer-util';
 import sheetRouter from 'sheet-router';
 import href from 'sheet-router/href';
+import history from 'sheet-router/history';
 import html, {update} from 'yo-yo';
 import { get } from 'axios';
+import nextTick from 'next-tick';
+
 var routesArray = [];
 var baseApiPath = '';
-var store = { NOTICE: 'Store object within halfcab should not be used server-side. It\'s only for client-side.' };
+var store = { NOTICE: 'The store object within halfcab should not be used server-side. It\'s only for client-side.' };
+var router;
+var rawDataObject = {};
 
-
+if(typeof window !== 'undefined'){
+    var routerObject = {router: {pathname: window.location.pathname}};
+    store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
+}
 
 function route(routeObject, callback){
     routesArray.push(Object.assign(routeObject, {callback}));
@@ -26,53 +34,76 @@ function formField(ob, prop){
     }
 }
 
+function getApiData(config, r, params){
+    //get data that the route needs first
+    baseApiPath = config.baseApiPath || '';
+    var startPromise;
+    if(r.skipApiCall){
+
+        startPromise = Promise.resolve({data: { data: null }});
+    }else{
+        startPromise = get(`${baseApiPath}${r.path}`)
+    }
+    return startPromise
+        .then(data => {
+            r.callback({apiData: data.data, params});
+            if(window.location.pathname !== r.path){
+                window.history.pushState({path: r.path}, r.title, r.path);
+            }
+            store.router.pathname = r.path;
+            document.title = r.path !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName;
+        })
+        .catch(err => {
+            console.log(err.toString());
+        });
+}
+
+var isClient = false;
+if(typeof window !== 'undefined'){
+    isClient = true;
+}
 
 export default function (config){
     //this default function is used for setting up client side and is not run on the server
-    store = observer.observable({});
-    baseApiPath = config.baseApiPath || '';
-    observer.observe(() => update(config.rootComponent, config.components()));
+    var { components } = config;
+    return new Promise((resolve, reject) => {
 
-    var routesFormatted = routesArray.map(r => [
-        r.path,
-        (params) =>{
+        var routesFormatted = routesArray.map(r => [
+            r.path,
+            (params) =>{
 
-            //get data that the route needs first
-            get(`${baseApiPath}${config.path}`)
-                .then(data => {
-                    config.data = data.data;
-                    r.callback(params);
-                    update(config.rootComponent, config.components(store));
-                    if(window.location.pathname !== r.path){
-                        window.history.pushState({path: r.path}, r.title, r.path);
-                        document.title = r.path !== '' ? `${config.baseName} - ${r.title}`: config.baseName;
+                getApiData(config, r, params);
+
+            }
+
+        ]);
+
+        router = sheetRouter({default: '/404'}, routesFormatted);
+
+        href((location) =>{
+            router(location.pathname);
+        });
+
+        history((location) => {
+            router(location.pathname);
+        });
+
+        getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
+            Object.assign(store, output.apiData);
+        }}).then(()=>{
+            nextTick(() => {
+                var startComponent = components(store);
+                observer.observe(() => {
+                    if(process.env.NODE_ENV !== 'production'){
+                        console.log(store.$raw);
                     }
-                })
-                .catch(err => {
-                    console.log(err.toString());
+                    update(startComponent, components(store))
                 });
-        }
-
-    ]);
-
-    var router = sheetRouter({default: '/404'}, routesFormatted);
-
-    href((link) =>{
-        router(link.pathname);
+                resolve(startComponent);//initial component
+            });
+        })
     });
-
-    window.onpopstate = function(event) {
-        router(event.state && event.state.route || '/');
-    };
-
-    return {
-        html,
-        route,
-        store,
-        emptyBody,
-        formField
-    }
 }
 
 
-export {html, route, store, emptyBody, formField};
+export {html, route, store, emptyBody, formField, router, isClient};
