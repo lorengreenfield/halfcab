@@ -5,6 +5,7 @@ import history from 'sheet-router/history';
 import html, {update} from 'yo-yo';
 import { get } from 'axios';
 import nextTick from 'next-tick';
+import css from 'csjs-inject';
 
 var routesArray = [];
 var baseApiPath = '';
@@ -106,4 +107,4 @@ export default function (config){
 }
 
 
-export {html, route, store, emptyBody, formField, router, isClient};
+export {html, route, store, emptyBody, formField, router, isClient, css};
