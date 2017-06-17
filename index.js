@@ -26,9 +26,9 @@ if(typeof window !== 'undefined'){
     exports.store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
 }else{
 
-    exports.css = function(cssString){
-        var output = css(cssString);
-        componentCSSString += output[' css '];
+    exports.css = function(cssStrings, ...values){
+        var output = css(cssStrings, ...values);
+        componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
         return output;
     };
 }

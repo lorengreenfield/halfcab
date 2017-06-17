@@ -20,11 +20,11 @@ if(typeof window !== 'undefined'){
     store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
 }else{
 
-    cssTag = function(cssString){
-        var output = css(cssString);
-        componentCSSString += output[' css '];
+    cssTag = function(cssStrings, ...values){
+        var output = css(cssStrings, ...values);
+        componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
         return output;
-    }
+    };
 }
 
 function componentCSS(){
