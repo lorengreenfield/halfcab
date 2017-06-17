@@ -12,6 +12,7 @@ var yoYo = require('yo-yo');
 var yoYo__default = _interopDefault(yoYo);
 var axios = require('axios');
 var nextTick = _interopDefault(require('next-tick'));
+var csjsInject = _interopDefault(require('csjs-inject'));
 
 var routesArray = [];
 var baseApiPath = '';
@@ -111,8 +112,12 @@ var index = function (config){
     });
 };
 
+var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
+
 exports['default'] = index;
+exports.cd = cd;
 exports.html = yoYo__default;
 exports.route = route;
 exports.emptyBody = emptyBody;
 exports.formField = formField;
+exports.css = csjsInject;

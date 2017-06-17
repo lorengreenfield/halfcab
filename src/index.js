@@ -5,6 +5,7 @@ import history from 'sheet-router/history';
 import html, {update} from 'yo-yo';
 import { get } from 'axios';
 import nextTick from 'next-tick';
+import css from 'csjs-inject';
 
 var routesArray = [];
 var baseApiPath = '';
@@ -105,5 +106,6 @@ export default function (config){
     });
 }
 
+var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {html, route, store, emptyBody, formField, router, isClient};
+export {cd, html, route, store, emptyBody, formField, router, isClient, css};
