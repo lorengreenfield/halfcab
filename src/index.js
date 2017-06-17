@@ -106,5 +106,6 @@ export default function (config){
     });
 }
 
+var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {html, route, store, emptyBody, formField, router, isClient, css};
+export {cd, html, route, store, emptyBody, formField, router, isClient, css};

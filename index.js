@@ -112,7 +112,10 @@ var index = function (config){
     });
 };
 
+var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
+
 exports['default'] = index;
+exports.cd = cd;
 exports.html = yoYo__default;
 exports.route = route;
 exports.emptyBody = emptyBody;
