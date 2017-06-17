@@ -12,8 +12,10 @@ var yoYo = require('yo-yo');
 var yoYo__default = _interopDefault(yoYo);
 var axios = require('axios');
 var nextTick = _interopDefault(require('next-tick'));
-var csjsInject = _interopDefault(require('csjs-inject'));
+var css = _interopDefault(require('csjs-inject'));
 
+exports.css = css;
+var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
 exports.store = { NOTICE: 'The store object within halfcab should not be used server-side. It\'s only for client-side.' };
@@ -22,6 +24,17 @@ var rawDataObject = {};
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
     exports.store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
+}else{
+
+    exports.css = function(cssString){
+        var output = css(cssString);
+        componentCSSString += output[' css '];
+        return output;
+    };
+}
+
+function componentCSS(){
+    return componentCSSString;
 }
 
 function route(routeObject, callback){
@@ -115,9 +128,9 @@ var index = function (config){
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = index;
+exports.componentCSS = componentCSS;
 exports.cd = cd;
 exports.html = yoYo__default;
 exports.route = route;
 exports.emptyBody = emptyBody;
 exports.formField = formField;
-exports.css = csjsInject;
