@@ -7,6 +7,8 @@ import { get } from 'axios';
 import nextTick from 'next-tick';
 import css from 'csjs-inject';
 
+var cssTag = css;
+var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
 var store = { NOTICE: 'The store object within halfcab should not be used server-side. It\'s only for client-side.' };
@@ -16,6 +18,17 @@ var rawDataObject = {};
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
     store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
+}else{
+
+    cssTag = function(cssStrings, ...values){
+        var output = css(cssStrings, ...values);
+        componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
+        return output;
+    };
+}
+
+function componentCSS(){
+    return componentCSSString;
 }
 
 function route(routeObject, callback){
@@ -108,4 +121,4 @@ export default function (config){
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {cd, html, route, store, emptyBody, formField, router, isClient, css};
+export {componentCSS, cd, html, route, store, emptyBody, formField, router, isClient, cssTag as css};
