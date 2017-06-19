@@ -111,7 +111,7 @@ export default function (config){
                     if(process.env.NODE_ENV !== 'production'){
                         console.log(store.$raw);
                     }
-                    update(startComponent, components(store))
+                    update(startComponent, components(store.$raw))
                 });
                 resolve(startComponent);//initial component
             });
