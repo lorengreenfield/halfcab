@@ -11,7 +11,7 @@ var cssTag = css;
 var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
-var store = { NOTICE: 'The store object within halfcab should not be used server-side. It\'s only for client-side.' };
+var store = {};
 var router;
 var rawDataObject = {};
 
@@ -103,7 +103,7 @@ export default function (config){
         });
 
         getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
-            Object.assign(store, output.apiData);
+            output.apiData.data && Object.assign(store, output.apiData);
         }}).then(()=>{
             nextTick(() => {
                 var startComponent = components(store);
@@ -111,7 +111,7 @@ export default function (config){
                     if(process.env.NODE_ENV !== 'production'){
                         console.log(store.$raw);
                     }
-                    update(startComponent, components(store.$raw))
+                    update(startComponent, components(store))
                 });
                 resolve(startComponent);//initial component
             });

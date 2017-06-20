@@ -18,7 +18,7 @@ exports.css = css;
 var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
-exports.store = { NOTICE: 'The store object within halfcab should not be used server-side. It\'s only for client-side.' };
+exports.store = {};
 var rawDataObject = {};
 
 if(typeof window !== 'undefined'){
@@ -109,7 +109,7 @@ var index = function (config){
         });
 
         getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
-            Object.assign(exports.store, output.apiData);
+            output.apiData.data && Object.assign(exports.store, output.apiData);
         }}).then(()=>{
             nextTick(() => {
                 var startComponent = components(exports.store);
