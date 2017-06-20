@@ -14,6 +14,7 @@ var baseApiPath = '';
 var store = {};
 var router;
 var rawDataObject = {};
+var firstRun = true;
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
@@ -105,20 +106,26 @@ export default function (config){
         getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
             output.apiData.data && Object.assign(store, output.apiData);
         }}).then(()=>{
-            nextTick(() => {
-                var startComponent = components(store);
-                observer.observe(() => {
-                    if(process.env.NODE_ENV !== 'production'){
-                        console.log(store.$raw);
-                    }
-                    update(startComponent, components(store))
-                });
-                resolve(startComponent);//initial component
+
+            var startComponent = components(store);
+            observer.observe(() => {
+                if(process.env.NODE_ENV !== 'production'){
+                    console.log(store.$raw);
+                }
+                if(!firstRun){
+                    return update(startComponent, components(store.$raw));
+                }
+
+                //no idea why, but we have to run this once with the Proxy object otherwise it won't observe anything
+                update(startComponent, components(store));
+                firstRun = false;
             });
+            resolve(startComponent);//initial component
+
         })
     });
 }
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {componentCSS, cd, html, route, store, emptyBody, formField, router, isClient, cssTag as css};
+export {componentCSS, cd, html, route, store, emptyBody, formField, router, isClient, cssTag as css, nextTick};
