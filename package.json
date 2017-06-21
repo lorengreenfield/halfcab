@@ -1,12 +1,13 @@
 {
   "name": "halfcab",
-  "version": "0.15.5",
+  "version": "1.0.0",
   "description": "A simple front end framework focused on making use of es2015 template strings to build components.",
-  "main": "index.js",
-  "module": "./src/index.js",
+  "main": "dist/halfcab.js",
+  "module": "halfcab.js",
+  "jsnext:main": "halfcab.js",
   "scripts": {
     "test": "mocha **/test.js",
-    "build": "rollup src/index.js --format cjs --output index.js",
+    "build": "rollup halfcab.js --format cjs --output dist/halfcab.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
     "build-publish": "npm run build && npm publish"
@@ -34,9 +35,9 @@
     "rollup": "^0.41.6"
   },
   "dependencies": {
-    "@nx-js/observer-util": "^2.0.0",
     "axios": "^0.16.1",
     "csjs-inject": "^1.0.1",
+    "deepmerge": "^1.4.4",
     "event-emitter": "^0.3.5",
     "next-tick": "^1.0.0",
     "sheet-router": "^4.2.3",

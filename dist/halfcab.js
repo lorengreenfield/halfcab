@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var observer = _interopDefault(require('@nx-js/observer-util'));
 var sheetRouter = _interopDefault(require('sheet-router'));
 var href = _interopDefault(require('sheet-router/href'));
 var history = _interopDefault(require('sheet-router/history'));
@@ -12,22 +11,66 @@ var yoYo = require('yo-yo');
 var yoYo__default = _interopDefault(yoYo);
 var axios = require('axios');
 var nextTick = _interopDefault(require('next-tick'));
-var css = _interopDefault(require('csjs-inject'));
+var cssInject = _interopDefault(require('csjs-inject'));
+var merge = _interopDefault(require('deepmerge'));
+var eventEmitter = _interopDefault(require('event-emitter'));
 
-exports.css = css;
+var events = eventEmitter({});
+
+function globalEventBus(){
+
+    function broadcast(eventName, eventObject){
+
+        //Set a break point on the following line to monitor all events being broadcast
+        console.log('Event broadcast: '+ eventName);
+        events.emit(eventName, eventObject);
+    }
+
+    function on(eventName, cb){
+
+        //Set a break point on the following line to monitor all events being listened to
+        events.on(eventName, cb);
+    }
+
+    function once(eventName, cb){
+
+        //Set a break point on the following line to monitor all events being listened to just once
+        events.once(eventName, cb);
+    }
+
+    function off(eventName, listenerFunction){
+
+        //Set a break point on the following line to monitor all events being unlistened to
+        events.off(eventName, listenerFunction);
+    }
+
+    return {
+        broadcast: broadcast,
+        on: on,
+        once: once,
+        off: off
+    }
+}
+
+var geb = new globalEventBus();
+
+exports.css = cssInject;
 var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
-exports.store = {};
-var rawDataObject = {};
+var maxStates = 50;
+var states = [];
+var rootEl;
+var components;
+
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
-    exports.store = observer.observable(rawDataObject, window.initialData ? Object.assign(rawDataObject, window.initialData, routerObject): routerObject);
+    states[0] = window.initialData ? Object.assign({}, window.initialData, routerObject): routerObject;
 }else{
 
     exports.css = function(cssStrings, ...values){
-        var output = css(cssStrings, ...values);
+        var output = cssInject(cssStrings, ...values);
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
         return output;
     };
@@ -54,6 +97,38 @@ function formField(ob, prop){
     }
 }
 
+function getLatestState(){
+    return states[states.length-1];
+}
+
+function setMaxStates(num){
+    maxStates = num;
+}
+
+function updateState(updateObject, options){
+
+    if(options.deepMerge){
+        states.push(Object.assign({}, merge(getLatestState(), updateObject)));
+    }else{
+        states.push(Object.assign({}, getLatestState(), updateObject));
+    }
+    if(states.length > maxStates){
+        states.shift();
+    }
+    yoYo.update(rootEl, components(getLatestState()));
+
+    if(process.env.NODE_ENV !== 'production'){
+        console.log('------STATE UPDATE------');
+        console.log(updateObject);
+        console.log('  ');
+        console.log('------NEW STATE------');
+        console.log(getLatestState());
+        console.log('  ');
+
+    }
+    return getLatestState();
+}
+
 function getApiData(config, r, params){
     //get data that the route needs first
     baseApiPath = config.baseApiPath || '';
@@ -70,7 +145,15 @@ function getApiData(config, r, params){
             if(window.location.pathname !== r.path){
                 window.history.pushState({path: r.path}, r.title, r.path);
             }
-            exports.store.router.pathname = r.path;
+
+            updateState({
+                router: {
+                    pathname: r.path
+                }
+            }, {
+                deepMerge: true
+            });
+
             document.title = r.path !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName;
         })
         .catch(err => {
@@ -83,9 +166,10 @@ if(typeof window !== 'undefined'){
     exports.isClient = true;
 }
 
-var index = function (config){
+var halfcab = function (config){
     //this default function is used for setting up client side and is not run on the server
-    var { components } = config;
+    components = config.components;
+    config.maxStates && setMaxStates(config.maxStates);
     return new Promise((resolve, reject) => {
 
         var routesFormatted = routesArray.map(r => [
@@ -109,28 +193,26 @@ var index = function (config){
         });
 
         getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
-            output.apiData.data && Object.assign(exports.store, output.apiData);
+            output.apiData.data && updateState(output.apiData);
         }}).then(()=>{
-            nextTick(() => {
-                var startComponent = components(exports.store);
-                observer.observe(() => {
-                    if(process.env.NODE_ENV !== 'production'){
-                        console.log(exports.store.$raw);
-                    }
-                    yoYo.update(startComponent, components(exports.store));
-                });
-                resolve(startComponent);//initial component
-            });
+
+            rootEl = components(getLatestState());
+            resolve(rootEl);//root element generated by components
         });
     });
 };
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-exports['default'] = index;
+exports['default'] = halfcab;
 exports.componentCSS = componentCSS;
+exports.states = states;
+exports.geb = geb;
+exports.eventEmitter = eventEmitter;
 exports.cd = cd;
 exports.html = yoYo__default;
 exports.route = route;
+exports.updateState = updateState;
 exports.emptyBody = emptyBody;
 exports.formField = formField;
+exports.nextTick = nextTick;
