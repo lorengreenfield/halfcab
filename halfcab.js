@@ -62,7 +62,7 @@ function setMaxStates(num){
 
 function updateState(updateObject, options){
 
-    if(options.deepMerge){
+    if(options && options.deepMerge){
         states.push(Object.assign({}, merge(getLatestState(), updateObject)));
     }else{
         states.push(Object.assign({}, getLatestState(), updateObject));

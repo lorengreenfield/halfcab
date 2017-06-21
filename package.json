@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple front end framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
