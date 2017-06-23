@@ -10,8 +10,8 @@ csjs-inject
 ### Routing
 sheet-router
 
-### Obserable global store object/state management
-@nx-js/observer-util
+### State management
+custom made + optional usage of deepmerge
 
 ### Network requests
 axios
