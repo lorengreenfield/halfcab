@@ -69,7 +69,7 @@ if(typeof window !== 'undefined'){
     states[0] = window.initialData ? Object.assign({}, window.initialData, routerObject): routerObject;
 }else{
 
-    exports.css = function(cssStrings, ...values){
+    exports.css = (cssStrings, ...values) => {
         var output = cssInject(cssStrings, ...values);
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
         return output;
@@ -92,7 +92,7 @@ function emptyBody(){
 
 function formField(ob, prop){
 
-    return function(e){
+    return e => {
         ob[prop] = e.currentTarget.value;
     }
 }
@@ -115,7 +115,15 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    yoYo.update(rootEl, components(getLatestState()));
+    yoYo.update(rootEl, components(getLatestState()), {
+        //morphdom options
+        onBeforeElUpdated: (fromEl, toEl) => {
+
+            //copy across mdc-web object to keep element updated
+            fromEl.dataset.mdcAutoInit && (toEl[fromEl.dataset.mdcAutoInit] = fromEl[fromEl.dataset.mdcAutoInit]);
+            //if we return false, the element will not be updated
+        }
+    });
 
     if(process.env.NODE_ENV !== 'production'){
         console.log('------STATE UPDATE------');
