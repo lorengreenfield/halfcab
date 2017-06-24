@@ -72,7 +72,7 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    update(rootEl, components(getLatestState()), {
+    rootEl && update(rootEl, components(getLatestState()), {
         //morphdom options
         onBeforeElUpdated: (fromEl, toEl) => {
 
