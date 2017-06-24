@@ -18,10 +18,12 @@ var router;
 var rootEl;
 var components;
 
-
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
-    states[0] = window.initialData ? Object.assign({}, window.initialData, routerObject): routerObject;
+    var dataInitial = document.querySelector('#initialData');
+    if(!!dataInitial){
+        states[0] = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
+    }
 }else{
 
     cssTag = (cssStrings, ...values) => {
@@ -155,7 +157,7 @@ export default function (config){
             router(location.pathname);
         });
 
-        getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
+        getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
             output.apiData.data && updateState(output.apiData);
         }}).then(()=>{
 
