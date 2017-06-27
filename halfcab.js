@@ -3,10 +3,9 @@ import href from 'sheet-router/href';
 import history from 'sheet-router/history';
 import html, {update} from 'yo-yo';
 import { get } from 'axios';
-import nextTick from 'next-tick';
 import cssInject from 'csjs-inject';
 import merge from 'deepmerge';
-import geb, { eventEmitter } from './geb';
+import geb, { eventEmitter } from './eventEmitter';
 
 var cssTag = cssInject;
 var componentCSSString = '';
@@ -18,10 +17,12 @@ var router;
 var rootEl;
 var components;
 
-
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
-    states[0] = window.initialData ? Object.assign({}, window.initialData, routerObject): routerObject;
+    var dataInitial = document.querySelector('#initialData');
+    if(!!dataInitial){
+        states[0] = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
+    }
 }else{
 
     cssTag = (cssStrings, ...values) => {
@@ -70,7 +71,7 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    update(rootEl, components(getLatestState()), {
+    rootEl && update(rootEl, components(getLatestState()), {
         //morphdom options
         onBeforeElUpdated: (fromEl, toEl) => {
 
@@ -124,9 +125,10 @@ function getApiData(config, r, params){
         });
 }
 
-var isClient = false;
-if(typeof window !== 'undefined'){
-    isClient = true;
+function injectHTML(htmlString){
+    var el = document.createElement('span');
+    el.innerHTML = htmlString;
+    return el;
 }
 
 export default function (config){
@@ -155,7 +157,7 @@ export default function (config){
             router(location.pathname);
         });
 
-        getApiData(config, { skipApiCall: !!window.initialData, path: location.pathname, callback: (output) => {
+        getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
             output.apiData.data && updateState(output.apiData);
         }}).then(()=>{
 
@@ -167,4 +169,4 @@ export default function (config){
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {componentCSS, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, isClient, cssTag as css, nextTick};
+export {componentCSS, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css};

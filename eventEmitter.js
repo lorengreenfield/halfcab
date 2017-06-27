@@ -1,7 +1,7 @@
-import eventEmitter from 'event-emitter';
-var events = eventEmitter({});
+import ee from 'event-emitter';
+var events = ee({});
 
-function globalEventBus(){
+function eventEmitter(){
 
     function broadcast(eventName, eventObject){
 
@@ -36,5 +36,5 @@ function globalEventBus(){
     }
 }
 
-export default new globalEventBus();
+export default new eventEmitter();
 export { eventEmitter };
