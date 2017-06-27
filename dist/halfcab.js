@@ -10,14 +10,13 @@ var history = _interopDefault(require('sheet-router/history'));
 var yoYo = require('yo-yo');
 var yoYo__default = _interopDefault(yoYo);
 var axios = require('axios');
-var nextTick = _interopDefault(require('next-tick'));
 var cssInject = _interopDefault(require('csjs-inject'));
 var merge = _interopDefault(require('deepmerge'));
-var eventEmitter = _interopDefault(require('event-emitter'));
+var ee = _interopDefault(require('event-emitter'));
 
-var events = eventEmitter({});
+var events = ee({});
 
-function globalEventBus(){
+function eventEmitter(){
 
     function broadcast(eventName, eventObject){
 
@@ -52,7 +51,7 @@ function globalEventBus(){
     }
 }
 
-var geb = new globalEventBus();
+var eventEmitter$1 = new eventEmitter();
 
 exports.css = cssInject;
 var componentCSSString = '';
@@ -117,7 +116,7 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    yoYo.update(rootEl, components(getLatestState()), {
+    rootEl && yoYo.update(rootEl, components(getLatestState()), {
         //morphdom options
         onBeforeElUpdated: (fromEl, toEl) => {
 
@@ -171,9 +170,10 @@ function getApiData(config, r, params){
         });
 }
 
-exports.isClient = false;
-if(typeof window !== 'undefined'){
-    exports.isClient = true;
+function injectHTML(htmlString){
+    var el = document.createElement('span');
+    el.innerHTML = htmlString;
+    return el;
 }
 
 var halfcab = function (config){
@@ -216,8 +216,9 @@ var cd = {};//empty object for storing client dependencies (or mocks or them on 
 
 exports['default'] = halfcab;
 exports.componentCSS = componentCSS;
+exports.injectHTML = injectHTML;
 exports.states = states;
-exports.geb = geb;
+exports.geb = eventEmitter$1;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
 exports.html = yoYo__default;
@@ -225,4 +226,3 @@ exports.route = route;
 exports.updateState = updateState;
 exports.emptyBody = emptyBody;
 exports.formField = formField;
-exports.nextTick = nextTick;
