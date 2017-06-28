@@ -127,9 +127,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    var el = document.createElement('span');
-    el.innerHTML = htmlString;
-    return el;
+    return html(htmlString);//using html as a regular function instead of a tag function
 }
 
 export default function (config){
