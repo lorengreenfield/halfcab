@@ -10,7 +10,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 - Built to work with material-components-web (UI components)
 
 
-halfcab exposes bunch of functions that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
+halfcab exposes a bunch of functions that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```
 import halfcab, { html, css, injectHTML, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router } from 'halfcab';
@@ -77,7 +77,7 @@ export default args => html`
 
 ```
 
-This is just regular HTML with one twist - Using event handlers like onclick will use the scope of your component, not the global scope. Just don't use quotation marks around it and put it within ${ }
+This is just regular HTML with one twist - Using event handlers like onclick will use the scope of your component, not the global scope. Just don't use quotation marks around it. Put it within ${ } instead.
 
 halfcab uses csjs for inline css, like so:
 ```
@@ -150,7 +150,7 @@ import { geb } from 'halfcab';
 geb.broadcast('doStuff', argsObject);
 ```
 
-The off method with turn off listening to events, and you'll need a named function to reference, eg:
+The off method will turn off listening to events, and you'll need a named function to reference, eg:
 ```
 var myFunc = args => {
 	alert('Stuff happened from myFunc');
@@ -171,6 +171,7 @@ import { eventEmitter } from 'halfcab';
 var localEvents = new eventEmitter();
 
 ```
+Then just use `localEvents` as you would `geb`;
 
 #### State management
 - `states` - an array storing 50 states by default (can be set within options)
@@ -207,7 +208,7 @@ geb.broadcast('fieldUpdate', 23);
 To prevent doubling up on api calls (one from the SSR and one from the browser), you can send your initial data for the app to get things going and include it in your HTML using base 64 encoded JSON attached to a script tag like so:
 
 ```
-<script id="initialData" data-initial="${new Buffer(JSON.stringify(apiData)).toString('base64')}"></script>
+<script data-initial="${new Buffer(JSON.stringify(apiData)).toString('base64')}"></script>
 
 ```
 This code is generated within node, so we have `Buffer` available to do base64 encoding. halfcab will decode this in the browser and set the first state with it, along with router information. (The state object contains a top level router object with a pathname property)
@@ -380,9 +381,9 @@ halfcab({
 
 ```
 Notice:
-1. This browser code is also creating an mdc function to add to the cd object, but this time, it's actually importing the real material-components-web library and using the autoInit feature, before returning the element;
+1. This browser code is also creating an mdc function to add to the cd object, but this time, it's actually importing the real material-components-web library and using the autoInit feature, before returning the element.
 2. We've set max states to 5 instead of the default 50 (you can set this to how big or small you want) - this is so you can manage undo-redo systems, or a store time travel like Redux, if you find that useful.
-3. the halfcab function returns a promise that has our root element read for us to use.
+3. The halfcab function returns a promise that returns our root element ready for us to use.
 
 ###### The common file between server and browser - components.js
 
