@@ -1,4 +1,5 @@
-# halfcab
+<p align="center"><img width="300" src="https://js.resorts-interactive.com/halfcab/halfcab.svg"></p>
+
 Halfcab is a universal JavaScript framework that assembles some elegant and easy to use libraries made by some very clever people, then adds some glue, sets some defaults, and hides a bit of the implementation so you don't have to worry about it.
 
 ## What you get
