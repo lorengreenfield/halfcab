@@ -7,8 +7,8 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var sheetRouter = _interopDefault(require('sheet-router'));
 var href = _interopDefault(require('sheet-router/href'));
 var history = _interopDefault(require('sheet-router/history'));
-var yoYo = require('yo-yo');
-var yoYo__default = _interopDefault(yoYo);
+var html = require('yo-yo');
+var html__default = _interopDefault(html);
 var axios = require('axios');
 var cssInject = _interopDefault(require('csjs-inject'));
 var merge = _interopDefault(require('deepmerge'));
@@ -64,7 +64,7 @@ var components;
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
-    var dataInitial = document.querySelector('#initialData');
+    var dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
         states[0] = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
     }
@@ -77,8 +77,9 @@ if(typeof window !== 'undefined'){
     };
 }
 
-function componentCSS(){
-    return componentCSSString;
+function ssr(rootComponent){
+    var componentsString = `${rootComponent}`;
+    return { componentsString, stylesString: componentCSSString };
 }
 
 function route(routeObject, callback){
@@ -116,7 +117,7 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    rootEl && yoYo.update(rootEl, components(getLatestState()), {
+    rootEl && html.update(rootEl, components(getLatestState()), {
         //morphdom options
         onBeforeElUpdated: (fromEl, toEl) => {
 
@@ -171,9 +172,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    var el = document.createElement('span');
-    el.innerHTML = htmlString;
-    return el;
+    return html__default(htmlString);//using html as a regular function instead of a tag function
 }
 
 var halfcab = function (config){
@@ -215,13 +214,13 @@ var halfcab = function (config){
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
-exports.componentCSS = componentCSS;
+exports.ssr = ssr;
 exports.injectHTML = injectHTML;
 exports.states = states;
 exports.geb = eventEmitter$1;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
-exports.html = yoYo__default;
+exports.html = html__default;
 exports.route = route;
 exports.updateState = updateState;
 exports.emptyBody = emptyBody;

@@ -19,7 +19,7 @@ var components;
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
-    var dataInitial = document.querySelector('#initialData');
+    var dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
         states[0] = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
     }
@@ -32,8 +32,9 @@ if(typeof window !== 'undefined'){
     };
 }
 
-function componentCSS(){
-    return componentCSSString;
+function ssr(rootComponent){
+    var componentsString = `${rootComponent}`;
+    return { componentsString, stylesString: componentCSSString };
 }
 
 function route(routeObject, callback){
@@ -126,9 +127,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    var el = document.createElement('span');
-    el.innerHTML = htmlString;
-    return el;
+    return html(htmlString);//using html as a regular function instead of a tag function
 }
 
 export default function (config){
@@ -169,4 +168,4 @@ export default function (config){
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {componentCSS, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css};
+export {ssr, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css};
