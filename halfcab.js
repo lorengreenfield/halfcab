@@ -2,7 +2,7 @@ import sheetRouter from 'sheet-router';
 import href from 'sheet-router/href';
 import history from 'sheet-router/history';
 import html, {update} from 'yo-yo';
-import { get } from 'axios';
+import axios, { get } from 'axios';
 import cssInject from 'csjs-inject';
 import merge from 'deepmerge';
 import geb, { eventEmitter } from './eventEmitter';
@@ -168,4 +168,4 @@ export default function (config){
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {ssr, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css};
+export {ssr, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http};

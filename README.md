@@ -11,10 +11,10 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 - Built to work with material-components-web (UI components)
 
 
-halfcab exposes a bunch of functions that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
+halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```
-import halfcab, { html, css, injectHTML, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router } from 'halfcab';
+import halfcab, { html, css, injectHTML, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -59,20 +59,20 @@ export default args => html`
    
     <header>
         <nav>
-			<div style="width: 280px;">
-				<img src="${args.company.logo.url}" />
-			</div>
+            <div style="width: 280px;">
+                <img src="${args.company.logo.url}" />
+            </div>
         
-			<div style="width: 216px; text-align: center;">
+            <div style="width: 216px; text-align: center;">
                         
-				<button onclick=${e => {
-				alert('I am a button')
-				}} 
-				data-mdc-auto-init="MDCRipple" 
-				class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
-				 </button>         
+                <button onclick=${e => {
+                alert('I am a button')
+                }} 
+                data-mdc-auto-init="MDCRipple" 
+                class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
+                </button>         
              </div>
-		</nav>
+        </nav>
     </header> 
 `;
 
@@ -108,20 +108,20 @@ export default args => html`
    
     <header class=${styles.header}>
         <nav>
-			<div style="width: 280px;">
-				<img src="${args.company.logo.url}" />
-			</div>
+            <div style="width: 280px;">
+                <img src="${args.company.logo.url}" />
+            </div>
         
-			<div style="width: 216px; text-align: center;">
+            <div style="width: 216px; text-align: center;">
                         
-				<button onclick=${e => {
-				alert('I am a button')
-				}} 
-				data-mdc-auto-init="MDCRipple" 
-				class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
-				 </button>         
-             </div>
-		</nav>
+                <button onclick=${e => {
+                alert('I am a button')
+                }} 
+                data-mdc-auto-init="MDCRipple" 
+                class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
+                </button>           
+            </div>
+        </nav>
     </header> 
 `;
 
@@ -141,7 +141,7 @@ Listen for an event:
 ```
 import { geb } from 'halfcab';
 geb.on('doStuff', args => {
-	alert('Stuff happened');
+    alert('Stuff happened');
 });
 ```
 
@@ -154,7 +154,7 @@ geb.broadcast('doStuff', argsObject);
 The off method will turn off listening to events, and you'll need a named function to reference, eg:
 ```
 var myFunc = args => {
-	alert('Stuff happened from myFunc');
+    alert('Stuff happened from myFunc');
 }
 geb.on('doStuff', myFunc);
 
@@ -201,7 +201,27 @@ geb.broadcast('fieldUpdate', 23);
 #### Utilities
 - `cd` - an object to put client dependencies inside when running code in the browser (and equivalent empty mocks when doing server side rendering) *See the full example at the bottom of this document for usage*
 - `emptyBody` - used to clear out the entire HTML body in the browser, to replace what's been rendered on the server. *See example usage in the setup section*
-- `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated. *See the full example at the bottom of this document for usage*
+- `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated.
+
+eg.
+
+```
+import {html, formField} from 'halfcab';
+
+var holidingPen = {
+    value: ''
+};
+
+export default args => html`
+    <main>
+        <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
+            <input type="text" class="mdc-textfield__input" oninput=${formField(holidingPen, 'value')}>
+            <label class="mdc-textfield__label" for="my-textfield">Hint text</label>
+        </div>
+    </main>
+`;
+
+```
 
 #### Server side rendering
 - `ssr` - wrap root component with the ssr function on the server to return an object with componentsString and stylesString properties to inject into your HTML base template *See the full example at the bottom of this document for usage*
@@ -215,11 +235,12 @@ To prevent doubling up on api calls (one from the SSR and one from the browser),
 This code is generated within node, so we have `Buffer` available to do base64 encoding. halfcab will decode this in the browser and set the first state with it, along with router information. (The state object contains a top level router object with a pathname property)
 ```
 state = {
- router: {
- 	pathname: '/reportpal'
- }
- //other stuff
- }
+    router: {
+ 	    pathname: '/reportpal'
+    }
+    
+    //other stuff
+}
 
 ```
 
@@ -257,7 +278,7 @@ router('/my-local-route');
 ### Other things worth mentioning
 
 #### Network requests
-halfcab uses `axios` internally for api calls, so feel free to import that into your own code.
+halfcab uses `axios` internally for api calls and exports this as the `http` object for use in your own code. *See the axios docs on how to use it*
 
 #### UI library
 halfcab is designed to work with the excellent material-components-web library.
@@ -427,8 +448,4 @@ Notice how we're wrapping the default function with cd.mdc - in the browser this
 This is our top level component, from here we're also pulling in three other components - topNav, body, and footer. This is the start of the tree-like component structure.
 
 ## Bundling
-halfcab doesn't need any special processing since it's all just JavaScript, CSS and HTML, but you'll want to bundle your files together. babelify/browserify, webpack, and rollup are all good choices. The yo-yo/bel community is more focused on browserify and it's probably the best choice for most apps because of that support and its simplicity. Webpack is the best choice if you want code splitting in a larger app or have some other processing requirements that need a bit of speed in your tool chain, and rollup is the best choice if you're wanting to include halfcab in your own library or framework.
-
-
-## Work in progress
-halfcab is a work in progress. It's matured quickly (with many iterations), but it will probably go though a lot more changes throughout 2017. As it gets used more and more in real world projects, it'll be tweaked to suit and the dust might settle a bit by 2018.
+halfcab doesn't need any special processing since it's all just JavaScript, CSS and HTML, but you'll want to bundle your files together. browserify, webpack, and rollup are all good choices, depending on your needs.
