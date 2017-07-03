@@ -173,7 +173,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    return html__default(htmlString);//using html as a regular function instead of a tag function
+    return html__default(htmlString.replace(/&amp;/g, '&'));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 var halfcab = function (config){
