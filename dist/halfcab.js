@@ -13,6 +13,7 @@ var axios = require('axios');
 var axios__default = _interopDefault(axios);
 var cssInject = _interopDefault(require('csjs-inject'));
 var merge = _interopDefault(require('deepmerge'));
+var htmlEntities = require('html-entities');
 var ee = _interopDefault(require('event-emitter'));
 
 var events = ee({});
@@ -54,6 +55,7 @@ function eventEmitter(){
 
 var eventEmitter$1 = new eventEmitter();
 
+const entities = new htmlEntities.AllHtmlEntities();
 exports.css = cssInject;
 var componentCSSString = '';
 var routesArray = [];
@@ -173,7 +175,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    return html__default([`<div>${htmlString.replace(/&amp;/g, '&')}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return html__default([`<div>${entities.decode(htmlString)}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 var halfcab = function (config){
