@@ -13,6 +13,7 @@ var axios = require('axios');
 var axios__default = _interopDefault(axios);
 var cssInject = _interopDefault(require('csjs-inject'));
 var merge = _interopDefault(require('deepmerge'));
+var marked = _interopDefault(require('marked'));
 var htmlEntities = require('html-entities');
 var ee = _interopDefault(require('event-emitter'));
 
@@ -64,6 +65,10 @@ var maxStates = 50;
 var states = [];
 var rootEl;
 var components;
+
+marked.setOptions({
+    breaks: true
+});
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
@@ -175,8 +180,13 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    return html__default([`<div>${entities.decode(htmlString)}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return html__default([`<div>${htmlString}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
+
+function injectMarkdown(mdString){
+    return injectHTML(entities.decode(marked(mdString)));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+}
+
 
 var halfcab = function (config){
     //this default function is used for setting up client side and is not run on the server
@@ -219,6 +229,7 @@ var cd = {};//empty object for storing client dependencies (or mocks or them on 
 exports['default'] = halfcab;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
+exports.injectMarkdown = injectMarkdown;
 exports.states = states;
 exports.geb = eventEmitter$1;
 exports.eventEmitter = eventEmitter;

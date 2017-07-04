@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "1.6.4",
+  "version": "1.7.2",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
@@ -39,6 +39,8 @@
     "csjs-inject": "^1.0.1",
     "deepmerge": "^1.4.4",
     "event-emitter": "^0.3.5",
+    "html-entities": "^1.2.1",
+    "marked": "^0.3.6",
     "sheet-router": "^4.2.3",
     "yo-yo": "^1.4.1"
   }
