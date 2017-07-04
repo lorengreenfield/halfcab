@@ -184,7 +184,7 @@ function injectHTML(htmlString){
 }
 
 function injectMarkdown(mdString){
-    return injectHTML(marked(entities.decode(mdString)));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return injectHTML(entities.decode(marked(mdString)));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 
