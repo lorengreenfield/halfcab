@@ -13,7 +13,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
-```
+```js
 import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
 ```
 
@@ -28,7 +28,7 @@ import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, upda
 
 This happens in the browser only:
 
-```
+```js
 import halfcab, { emptyBody } from 'halfcab';
 halfcab({
     baseName: 'My company',//tab title base name
@@ -53,7 +53,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 Under the hood, halfcab uses yo-yo, which in turn uses bel. bel turns tagged template literals into dom elements.
 
 Here's an example of a simple component:
-```
+```js
 import { html } from 'halfcab';
 
 export default args => html`
@@ -82,7 +82,7 @@ export default args => html`
 This is just regular HTML with one twist - Using event handlers like onclick will use the scope of your component, not the global scope. Just don't use quotation marks around it. Put it within ${ } instead.
 
 halfcab uses csjs for inline css, like so:
-```
+```js
 import { html, css } from 'halfcab';
 
 var cssVar = '#FFCC00';
@@ -139,7 +139,7 @@ Notice how you can use media queries, and inject variables using JavaScript! The
 Most often you'll use broadcast and on.
 
 Listen for an event:
-```
+```js
 import { geb } from 'halfcab';
 geb.on('doStuff', args => {
     alert('Stuff happened');
@@ -147,19 +147,19 @@ geb.on('doStuff', args => {
 ```
 
 Broadcast an event:
-```
+```js
 import { geb } from 'halfcab';
 geb.broadcast('doStuff', argsObject);
 ```
 
 The off method will turn off listening to events, and you'll need a named function to reference, eg:
-```
+```js
 var myFunc = args => {
     alert('Stuff happened from myFunc');
-}
+};
 geb.on('doStuff', myFunc);
 
-......sometime later on
+//......sometime later on
 
 geb.off('doStuff', myFunc);
 ```
@@ -168,7 +168,7 @@ The `once` method is just like `on`, but once the event has been executed, it'll
 
 If you don't want your events to be global, new up an `eventEmitter` like so:
 
-```
+```js
 import { eventEmitter } from 'halfcab';
 var localEvents = new eventEmitter();
 
@@ -178,9 +178,9 @@ Then just use `localEvents` as you would `geb`;
 #### State management
 - `states` - an array storing 50 states by default (can be set within options)
 - `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause components to re-render, and a new state object to be pushed onto the end of the states array (Removing the first item in the array if it's reached the maxStates allowed).
+//
 
-
-```
+```js
 import { updateState, geb } from 'halfcab';
 
 geb.on('fieldUpdate', newValue => {
@@ -193,7 +193,7 @@ geb.on('fieldUpdate', newValue => {
     })
 });
 
-....sometime later from somewhere else in the app
+//....sometime later from somewhere else in the app
 
 geb.broadcast('fieldUpdate', 23);
 
@@ -206,7 +206,7 @@ geb.broadcast('fieldUpdate', 23);
 
 eg.
 
-```
+```js
 import {html, formField} from 'halfcab';
 
 var holidingPen = {
@@ -229,12 +229,12 @@ export default args => html`
 
 To prevent doubling up on api calls (one from the SSR and one from the browser), you can send your initial data for the app to get things going and include it in your HTML using base 64 encoded JSON attached to a script tag like so:
 
-```
+```html
 <script data-initial="${new Buffer(JSON.stringify(apiData)).toString('base64')}"></script>
 
 ```
 This code is generated within node, so we have `Buffer` available to do base64 encoding. halfcab will decode this in the browser and set the first state with it, along with router information. (The state object contains a top level router object with a pathname property)
-```
+```js
 state = {
     router: {
  	    pathname: '/reportpal'
@@ -253,7 +253,7 @@ state = {
 halfcab tries not to force you to use a single solution for both server side and browser routing. Provide your own server side routing and then use `route` for setting up browser routes from halfcab.
 
 Create a new route:
-```
+```js
 import { route } from 'halfcab';
 route({path: '/reportpal', title: 'Report Pal', skipApiCall: true}, output =>{
     //do something
@@ -271,7 +271,7 @@ Once your routes are set up using the `route` function, there's two ways to tell
 1. a-href - Just use `a` tags as you normally would with the `href` property and the router will pick that up and route the app. The bonus of this approach is that using href is an easy way to help crawlers find their way through your site, and if structured carefully, you can also have basic navigation without the need for running JavaScript in the browser.
 
 2. Use the `router` function
-```
+```js
 import { router } from 'halfcab';
 router('/my-local-route');
 ```
@@ -303,7 +303,7 @@ route.js
 ```
 
 route.js could have a lot of other things going on ( it's up to you and your server side framework ) but the key part for us is that it runs:
-```
+```js
 import htmlTemplate from './htmlTemplate';
 
 //somewhere else in file after http GET request to the route comes in:
@@ -313,7 +313,7 @@ htmlTemplate(someJSONData);
 
 htmlTemplate.js
 
-```
+```js
 import pack from '../../../package';
 import components from '../../../components';
 import { ssr, cd } from 'halfcab';
@@ -378,7 +378,7 @@ app.js
              
 ```
 app.js
-```
+```js
 import halfcab, { emptyBody, cd } from 'halfcab';
 import { autoInit } from 'material-components-web';
 import './server/**/client.js';//registers client routes
@@ -410,7 +410,7 @@ Notice:
 
 ###### The common file between server and browser - components.js
 
-```
+```js
 import { html, cd } from 'halfcab';
 import topNav from './topNav';
 import body from './body';
