@@ -14,7 +14,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```
-import halfcab, { html, css, injectHTML, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -48,6 +48,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
+- `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
 Under the hood, halfcab uses yo-yo, which in turn uses bel. bel turns tagged template literals into dom elements.
 

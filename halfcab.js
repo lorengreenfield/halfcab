@@ -5,6 +5,7 @@ import html, {update} from 'yo-yo';
 import axios, { get } from 'axios';
 import cssInject from 'csjs-inject';
 import merge from 'deepmerge';
+import marked from 'marked';
 import { AllHtmlEntities } from 'html-entities';
 import geb, { eventEmitter } from './eventEmitter';
 
@@ -18,6 +19,10 @@ var states = [];
 var router;
 var rootEl;
 var components;
+
+marked.setOptions({
+    breaks: true
+});
 
 if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
@@ -129,8 +134,13 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    return html([`<div>${entities.decode(htmlString)}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return html([`<div>${htmlString}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
+
+function injectMarkdown(mdString){
+    return injectHTML(marked(entities.decode(mdString)));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+}
+
 
 export default function (config){
     //this default function is used for setting up client side and is not run on the server
@@ -170,4 +180,4 @@ export default function (config){
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
-export {ssr, injectHTML, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http};
+export {ssr, injectHTML, injectMarkdown, states, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http};
