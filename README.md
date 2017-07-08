@@ -3,7 +3,7 @@
 Halfcab is a universal JavaScript framework that assembles some elegant and easy to use libraries made by some very clever people, then adds some glue, sets some defaults, and hides a bit of the implementation so you don't have to worry about it.
 
 ## What you get
-- Syntax is the "web framework" - JavaScript, CSS, HTML
+- Syntax is the "web platform" - JavaScript, CSS, HTML
 - Component based with es2015 template literals
 - Components contain JS, HTML and CSS altogether in one file
 - Both browser and server side component rendering
@@ -415,14 +415,13 @@ import { html, cd } from 'halfcab';
 import topNav from './topNav';
 import body from './body';
 import footer from './footer';
-import find from 'lodash.find';
 
 function products(products){
 
     return {
-        seemonster: find(products, { name: 'SeeMonster' }),
-        vicomap: find(products, { name: 'vicoMap' }),
-        reportpal: find(products, { name: 'Report Pal' })
+        seemonster: products.find(item => item.name === 'SeeMonster'),
+        vicomap: products.find(item => item.name === 'vicoMap'),
+        reportpal: products.find(item => item.name === 'Report Pal')
     }
 }
 
