@@ -104,6 +104,8 @@ function formField(ob, prop){
 
     return e => {
         ob[prop] = e.currentTarget.value;
+        console.log('---formField update---');
+        console.log(prop, ob);
     }
 }
 
