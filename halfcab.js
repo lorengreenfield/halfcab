@@ -84,7 +84,7 @@ function updateState(updateObject, options){
         onBeforeElUpdated: (fromEl, toEl) => {
 
             //copy across mdc-web object to keep element updated
-            fromEl.dataset.mdcAutoInit && (toEl[fromEl.dataset.mdcAutoInit] = fromEl[fromEl.dataset.mdcAutoInit]);
+            fromEl.dataset.mdcAutoInit && Object.getOwnPropertyDescriptor(toEl, fromEl.dataset.mdcAutoInit).writable && (toEl[fromEl.dataset.mdcAutoInit] = fromEl[fromEl.dataset.mdcAutoInit]);
             //if we return false, the element will not be updated
         }
     });
