@@ -103,7 +103,7 @@ function emptyBody(){
 function formField(ob, prop){
 
     return e => {
-        ob[prop] = e.currentTarget.value;
+        ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value;
         console.log('---formField update---');
         console.log(prop, ob);
     }
