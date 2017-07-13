@@ -50,7 +50,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
-Under the hood, halfcab uses yo-yo, which in turn uses bel. bel turns tagged template literals into dom elements.
+Under the hood, halfcab uses bel + mdc-nanomorph, which turns tagged template literals into dom elements.
 
 Here's an example of a simple component:
 ```js

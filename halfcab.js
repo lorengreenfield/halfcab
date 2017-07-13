@@ -1,7 +1,8 @@
 import sheetRouter from 'sheet-router';
 import href from 'sheet-router/href';
 import history from 'sheet-router/history';
-import html, {update} from 'yo-yo';
+import html from 'bel';
+import update from 'mdc-nanomorph';
 import axios, { get } from 'axios';
 import cssInject from 'csjs-inject';
 import merge from 'deepmerge';
@@ -19,6 +20,7 @@ var states = [];
 var router;
 var rootEl;
 var components;
+var postUpdate;
 
 marked.setOptions({
     breaks: true
@@ -81,19 +83,9 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    rootEl && update(rootEl, components(getLatestState()), {
-        //morphdom options
-        onBeforeElUpdated: (fromEl, toEl) => {
 
-            //copy across mdc-web object to keep element updated
-            if(fromEl.dataset.mdcAutoInit){
-                var toDetails = Object.getOwnPropertyDescriptor(toEl, fromEl.dataset.mdcAutoInit);
-                toDetails && toDetails.writable && (toEl[fromEl.dataset.mdcAutoInit] = fromEl[fromEl.dataset.mdcAutoInit]);
-            }
-
-            //if we return false, the element will not be updated
-        }
-    });
+    rootEl && update(rootEl, components(getLatestState()));
+    postUpdate && postUpdate();
 
     if(process.env.NODE_ENV !== 'production'){
         console.log('------STATE UPDATE------');
@@ -110,6 +102,7 @@ function updateState(updateObject, options){
 function getApiData(config, r, params){
     //get data that the route needs first
     baseApiPath = config.baseApiPath || '';
+    postUpdate = config.postUpdate;
     var startPromise;
     if(r.skipApiCall){
 

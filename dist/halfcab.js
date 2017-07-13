@@ -7,8 +7,8 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var sheetRouter = _interopDefault(require('sheet-router'));
 var href = _interopDefault(require('sheet-router/href'));
 var history = _interopDefault(require('sheet-router/history'));
-var html = require('yo-yo');
-var html__default = _interopDefault(html);
+var html = _interopDefault(require('bel'));
+var update = _interopDefault(require('mdc-nanomorph'));
 var axios = require('axios');
 var axios__default = _interopDefault(axios);
 var cssInject = _interopDefault(require('csjs-inject'));
@@ -65,6 +65,7 @@ var maxStates = 50;
 var states = [];
 var rootEl;
 var components;
+var postUpdate;
 
 marked.setOptions({
     breaks: true
@@ -127,19 +128,9 @@ function updateState(updateObject, options){
     if(states.length > maxStates){
         states.shift();
     }
-    rootEl && html.update(rootEl, components(getLatestState()), {
-        //morphdom options
-        onBeforeElUpdated: (fromEl, toEl) => {
 
-            //copy across mdc-web object to keep element updated
-            if(fromEl.dataset.mdcAutoInit){
-                var toDetails = Object.getOwnPropertyDescriptor(toEl, fromEl.dataset.mdcAutoInit);
-                toDetails && toDetails.writable && (toEl[fromEl.dataset.mdcAutoInit] = fromEl[fromEl.dataset.mdcAutoInit]);
-            }
-
-            //if we return false, the element will not be updated
-        }
-    });
+    rootEl && update(rootEl, components(getLatestState()));
+    postUpdate && postUpdate();
 
     if(process.env.NODE_ENV !== 'production'){
         console.log('------STATE UPDATE------');
@@ -156,6 +147,7 @@ function updateState(updateObject, options){
 function getApiData(config, r, params){
     //get data that the route needs first
     baseApiPath = config.baseApiPath || '';
+    postUpdate = config.postUpdate;
     var startPromise;
     if(r.skipApiCall){
 
@@ -186,7 +178,7 @@ function getApiData(config, r, params){
 }
 
 function injectHTML(htmlString){
-    return html__default([`<div>${htmlString}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return html([`<div>${htmlString}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function injectMarkdown(mdString){
@@ -240,7 +232,7 @@ exports.states = states;
 exports.geb = eventEmitter$1;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
-exports.html = html__default;
+exports.html = html;
 exports.route = route;
 exports.updateState = updateState;
 exports.emptyBody = emptyBody;
