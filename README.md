@@ -189,7 +189,7 @@ geb.on('fieldUpdate', newValue => {
             value: newValue
         }
     }, {
-        deepMerge: true
+        deepMerge: false//deep merging on by default, set to false o overwrite whole objects without merging
     })
 });
 
