@@ -7,7 +7,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 - Component based with es2015 template literals
 - Components contain JS, HTML and CSS altogether in one file
 - Both browser and server side component rendering
-- State management, including state history tracking for easy undo-redo
+- Easy state management
 - Built to work with material-components-web (UI components)
 
 
@@ -175,9 +175,8 @@ var localEvents = new eventEmitter();
 Then just use `localEvents` as you would `geb`;
 
 #### State management
-- `states` - an array storing 50 states by default (can be set within options)
-- `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause components to re-render, and a new state object to be pushed onto the end of the states array (Removing the first item in the array if it's reached the maxStates allowed).
-//
+- `state` - an object that contains the application state
+- `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
 
 ```js
 import { updateState, geb } from 'halfcab';
@@ -188,7 +187,7 @@ geb.on('fieldUpdate', newValue => {
             value: newValue
         }
     }, {
-        deepMerge: false//deep merging on by default, set to false o overwrite whole objects without merging
+        deepMerge: false//deep merging on by default, set to false to overwrite whole objects without merging
     })
 });
 
@@ -392,8 +391,7 @@ cd.mdc = mdc;
 halfcab({
     baseName: 'Resorts Interactive',
     baseApiPath: '/api/webroutes',
-    components,
-    maxStates: 5
+    components
 }).then( root => {
     emptyBody();
     document.body.appendChild(root);
@@ -404,8 +402,7 @@ halfcab({
 ```
 Notice:
 1. This browser code is also creating an mdc function to add to the cd object, but this time, it's actually importing the real material-components-web library and using the autoInit feature, before returning the element.
-2. We've set max states to 5 instead of the default 50 (you can set this to how big or small you want) - this is so you can manage undo-redo systems, or a store time travel like Redux, if you find that useful.
-3. The halfcab function returns a promise that returns our root element ready for us to use.
+2. The halfcab function returns a promise that returns our root element ready for us to use.
 
 ###### The common file between server and browser - components.js
 

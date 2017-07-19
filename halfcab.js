@@ -84,10 +84,12 @@ function stateUpdated(){
 
 function updateState(updateObject, options){
 
-    if(options && options.deepMerge === false){
-        Object.assign(state, updateObject)
-    }else{
-        state = merge(state, updateObject)
+    if(updateObject){
+        if(options && options.deepMerge === false){
+            Object.assign(state, updateObject)
+        }else{
+            state = merge(state, updateObject)
+        }
     }
 
     debounce(stateUpdated)
