@@ -14,7 +14,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -34,7 +34,6 @@ halfcab({
     baseName: 'My company',//tab title base name
     baseApiPath: '/api/webroutes',
     components, //top level component module
-    maxStates: 5 //how many states to store in the states array
 }).then( root => {
     emptyBody();
     document.body.appendChild(root);
