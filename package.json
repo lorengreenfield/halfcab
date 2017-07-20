@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "2.0.0",
+  "version": "3.1.0",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
@@ -10,6 +10,7 @@
     "build": "rollup halfcab.js --format cjs --output dist/halfcab.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
+    "versionbump:breakingchanges": "npm version major --no-git-tag-version",
     "build-publish": "npm run build && npm publish"
   },
   "repository": {

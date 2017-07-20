@@ -7,14 +7,14 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 - Component based with es2015 template literals
 - Components contain JS, HTML and CSS altogether in one file
 - Both browser and server side component rendering
-- State management, including state history tracking for easy undo-redo
+- Easy state management
 - Built to work with material-components-web (UI components)
 
 
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, states, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -34,7 +34,6 @@ halfcab({
     baseName: 'My company',//tab title base name
     baseApiPath: '/api/webroutes',
     components, //top level component module
-    maxStates: 5 //how many states to store in the states array
 }).then( root => {
     emptyBody();
     document.body.appendChild(root);
@@ -176,9 +175,8 @@ var localEvents = new eventEmitter();
 Then just use `localEvents` as you would `geb`;
 
 #### State management
-- `states` - an array storing 50 states by default (can be set within options)
-- `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause components to re-render, and a new state object to be pushed onto the end of the states array (Removing the first item in the array if it's reached the maxStates allowed).
-//
+- `state` - an object that contains the application state
+- `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
 
 ```js
 import { updateState, geb } from 'halfcab';
@@ -189,7 +187,7 @@ geb.on('fieldUpdate', newValue => {
             value: newValue
         }
     }, {
-        deepMerge: false//deep merging on by default, set to false o overwrite whole objects without merging
+        deepMerge: false//deep merging on by default, set to false to overwrite whole objects without merging
     })
 });
 
@@ -203,14 +201,18 @@ geb.broadcast('fieldUpdate', 23);
 - `cd` - an object to put client dependencies inside when running code in the browser (and equivalent empty mocks when doing server side rendering) *See the full example at the bottom of this document for usage*
 - `emptyBody` - used to clear out the entire HTML body in the browser, to replace what's been rendered on the server. *See example usage in the setup section*
 - `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated.
+- `formValid` - test if a holdingPen object's values are all valid. Halfcab will automatically populate a `valid` object within the holding pen that contains the same keys. The validity of these is best set when you define the holding pen's initial values.
 
 eg.
 
 ```js
-import {html, formField} from 'halfcab';
+import {html, formField, formValid} from 'halfcab';
 
 var holidingPen = {
-    value: ''
+    value: '',
+    valid: {
+        value: true//The starting value is considered valid
+    }
 };
 
 export default args => html`
@@ -222,6 +224,11 @@ export default args => html`
     </main>
 `;
 
+//...sometime later, perhaps when subitting the form
+
+if(!formValid(holdingPen)){
+    alert('Form not valid');
+}
 ```
 
 #### Server side rendering
@@ -393,8 +400,7 @@ cd.mdc = mdc;
 halfcab({
     baseName: 'Resorts Interactive',
     baseApiPath: '/api/webroutes',
-    components,
-    maxStates: 5
+    components
 }).then( root => {
     emptyBody();
     document.body.appendChild(root);
@@ -405,8 +411,7 @@ halfcab({
 ```
 Notice:
 1. This browser code is also creating an mdc function to add to the cd object, but this time, it's actually importing the real material-components-web library and using the autoInit feature, before returning the element.
-2. We've set max states to 5 instead of the default 50 (you can set this to how big or small you want) - this is so you can manage undo-redo systems, or a store time travel like Redux, if you find that useful.
-3. The halfcab function returns a promise that returns our root element ready for us to use.
+2. The halfcab function returns a promise that returns our root element ready for us to use.
 
 ###### The common file between server and browser - components.js
 

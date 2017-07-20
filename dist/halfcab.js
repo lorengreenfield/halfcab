@@ -73,8 +73,7 @@ exports.css = cssInject;
 var componentCSSString = '';
 var routesArray = [];
 var baseApiPath = '';
-var maxStates = 50;
-var states = [];
+exports.state = {};
 var rootEl;
 var components;
 var postUpdate;
@@ -87,20 +86,20 @@ if(typeof window !== 'undefined'){
     var routerObject = {router: {pathname: window.location.pathname}};
     var dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
-        states[0] = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
+        exports.state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
     }
 }else{
 
     exports.css = (cssStrings, ...values) => {
         var output = cssInject(cssStrings, ...values);
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
-        return output;
+        return output
     };
 }
 
 function ssr(rootComponent){
     var componentsString = `${rootComponent}`;
-    return { componentsString, stylesString: componentCSSString };
+    return { componentsString, stylesString: componentCSSString }
 }
 
 function route(routeObject, callback){
@@ -117,43 +116,71 @@ function formField(ob, prop){
 
     return e => {
         ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value;
+
+        if(!ob.valid){
+            ob.valid = {};
+        }
+        ob.valid[prop] = e.currentTarget.validity.valid;
         console.log('---formField update---');
         console.log(prop, ob);
+        console.log(`Valid? ${ob.valid[prop]}`);
     }
 }
 
-function getLatestState(){
-    return states[states.length-1];
+function formValid(holidingPen){
+    var validOb = Object.keys(holidingPen.valid);
+    if(!validOb){
+        return false
+    }
+
+    for(var i = 0; i < validOb.length; i ++){
+        if(holidingPen.valid[validOb[i]] !== true){
+            return false
+        }
+    }
+
+    return true
 }
 
-function setMaxStates(num){
-    maxStates = num;
+var waitingAlready = false;
+function debounce(func) {
+    if(!waitingAlready){
+        waitingAlready = true;
+        requestAnimationFrame(() => {
+            func();
+            waitingAlready = false;
+        });
+    }
 }
+
+function stateUpdated(){
+    rootEl && update(rootEl, components(exports.state));
+    postUpdate && postUpdate();
+}
+
 
 function updateState(updateObject, options){
 
-    if(options && options.deepMerge === false){
-        states.push(Object.assign({}, getLatestState(), updateObject));
-    }else{
-        states.push(Object.assign({}, merge(getLatestState(), updateObject)));
-    }
-    if(states.length > maxStates){
-        states.shift();
+    if(updateObject){
+        if(options && options.deepMerge === false){
+            Object.assign(exports.state, updateObject);
+        }else{
+            exports.state = merge(exports.state, updateObject);
+        }
     }
 
-    rootEl && update(rootEl, components(getLatestState()));
-    postUpdate && postUpdate();
+    debounce(stateUpdated);
+
 
     if(process.env.NODE_ENV !== 'production'){
         console.log('------STATE UPDATE------');
         console.log(updateObject);
         console.log('  ');
         console.log('------NEW STATE------');
-        console.log(getLatestState());
+        console.log(exports.state);
         console.log('  ');
 
     }
-    return getLatestState();
 }
 
 function getApiData(config, r, params){
@@ -186,22 +213,21 @@ function getApiData(config, r, params){
         })
         .catch(err => {
             console.log(err.toString());
-        });
+        })
 }
 
 function injectHTML(htmlString){
-    return html([`<div>${htmlString}</div>`]);//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function injectMarkdown(mdString){
-    return injectHTML(entities.decode(marked(mdString)));//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+    return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 
 var halfcab = function (config){
     //this default function is used for setting up client side and is not run on the server
     components = config.components;
-    config.maxStates && setMaxStates(config.maxStates);
     return new Promise((resolve, reject) => {
 
         var routesFormatted = routesArray.map(r => [
@@ -228,19 +254,19 @@ var halfcab = function (config){
             output.apiData.data && updateState(output.apiData);
         }}).then(()=>{
 
-            rootEl = components(getLatestState());
+            rootEl = components(exports.state);
             resolve(rootEl);//root element generated by components
         });
-    });
+    })
 };
 
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
+exports.formValid = formValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
 exports.injectMarkdown = injectMarkdown;
-exports.states = states;
 exports.geb = eventEmitter$1;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
