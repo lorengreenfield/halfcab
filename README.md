@@ -14,7 +14,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -201,14 +201,18 @@ geb.broadcast('fieldUpdate', 23);
 - `cd` - an object to put client dependencies inside when running code in the browser (and equivalent empty mocks when doing server side rendering) *See the full example at the bottom of this document for usage*
 - `emptyBody` - used to clear out the entire HTML body in the browser, to replace what's been rendered on the server. *See example usage in the setup section*
 - `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated.
+- `formValid` - test if a holdingPen object's values are all valid. Halfcab will automatically populate a `valid` object within the holding pen that contains the same keys. The validity of these is best set when you define the holding pen's initial values.
 
 eg.
 
 ```js
-import {html, formField} from 'halfcab';
+import {html, formField, formValid} from 'halfcab';
 
 var holidingPen = {
-    value: ''
+    value: '',
+    valid: {
+        value: true//The starting value is considered valid
+    }
 };
 
 export default args => html`
@@ -220,6 +224,11 @@ export default args => html`
     </main>
 `;
 
+//...sometime later, perhaps when subitting the form
+
+if(!formValid(holdingPen)){
+    alert('Form not valid');
+}
 ```
 
 #### Server side rendering

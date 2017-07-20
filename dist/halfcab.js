@@ -116,11 +116,31 @@ function formField(ob, prop){
 
     return e => {
         ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value;
+
+        if(!ob.valid){
+            ob.valid = {};
+        }
+        ob.valid[prop] = e.currentTarget.validity.valid;
         console.log('---formField update---');
         console.log(prop, ob);
+        console.log(`Valid? ${ob.valid[prop]}`);
     }
 }
 
+function formValid(holidingPen){
+    var validOb = Object.keys(holidingPen.valid);
+    if(!validOb){
+        return false
+    }
+
+    for(var i = 0; i < validOb.length; i ++){
+        if(holidingPen.valid[validOb[i]] !== true){
+            return false
+        }
+    }
+
+    return true
+}
 
 var waitingAlready = false;
 function debounce(func) {
@@ -243,6 +263,7 @@ var halfcab = function (config){
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
+exports.formValid = formValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
 exports.injectMarkdown = injectMarkdown;
