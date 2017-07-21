@@ -3,11 +3,14 @@ import dirtyChai from 'dirty-chai';
 import { noPreserveCache } from 'proxyquire';
 const proxyquire = noPreserveCache().noCallThru();
 chai.use(dirtyChai);
+import halfcab from './halfcab'
 
 describe('halfcab', function(){
 
     before(function(){
-
+        // halfcab({
+        //
+        // })
     });
 
     it('Fake 1', function(){

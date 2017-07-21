@@ -7,7 +7,7 @@
   "jsnext:main": "halfcab.js",
   "scripts": {
     "test": "mocha --require reify test.js",
-    "coveralls": "nyc npm test && nyc report --exclude=test.js --reporter=lcov | coveralls",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "build": "rollup halfcab.js --format cjs --output dist/halfcab.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
@@ -39,6 +39,7 @@
     "coveralls": "^2.13.1",
     "dirty-chai": "^2.0.1",
     "mocha": "^3.4.2",
+    "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^11.0.3",
     "proxyquire": "^1.8.0",
     "reify": "^0.12.0",
