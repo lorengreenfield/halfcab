@@ -1,12 +1,13 @@
 {
   "name": "halfcab",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
   "jsnext:main": "halfcab.js",
   "scripts": {
     "test": "mocha --require reify test.js",
+    "coveralls": "nyc npm test && nyc report --exclude=test.js --reporter=lcov | coveralls",
     "build": "rollup halfcab.js --format cjs --output dist/halfcab.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
@@ -35,6 +36,7 @@
   "homepage": "https://github.com/lorengreenfield/halfcab#readme",
   "devDependencies": {
     "chai": "^4.1.0",
+    "coveralls": "^2.13.1",
     "dirty-chai": "^2.0.1",
     "mocha": "^3.4.2",
     "nyc": "^11.0.3",
