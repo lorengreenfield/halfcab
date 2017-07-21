@@ -3,6 +3,8 @@
 Halfcab is a universal JavaScript framework that assembles some elegant and easy to use libraries made by some very clever people, then adds some glue, sets some defaults, and hides a bit of the implementation so you don't have to worry about it.
 
 ## What you get
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/lorengreenfield/halfcab.svg)](https://greenkeeper.io/)
 - Syntax is the "web platform" - JavaScript, CSS, HTML
 - Component based with es2015 template literals
 - Components contain JS, HTML and CSS altogether in one file
