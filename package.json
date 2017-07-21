@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
@@ -44,7 +44,7 @@
     "event-emitter": "^0.3.5",
     "html-entities": "^1.2.1",
     "marked": "^0.3.6",
-    "mdc-nanomorph": "^0.1.0",
+    "mdc-nanomorph": "^0.1.1",
     "sheet-router": "^4.2.3"
   }
 }
