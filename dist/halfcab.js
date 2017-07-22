@@ -68,7 +68,8 @@ function eventEmitter(){
 
 var eventEmitter$1 = new eventEmitter();
 
-const entities = new htmlEntities.AllHtmlEntities();
+var componentRegistry;
+var entities = new htmlEntities.AllHtmlEntities();
 exports.css = cssInject;
 var componentCSSString = '';
 var routesArray = [];
@@ -83,6 +84,7 @@ marked.setOptions({
 });
 
 if(typeof window !== 'undefined'){
+    componentRegistry = new Map();
     var routerObject = {router: {pathname: window.location.pathname}};
     var dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
@@ -224,6 +226,26 @@ function injectMarkdown(mdString){
     return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
+function component(c, args){
+
+    if(typeof window === 'undefined'){
+        return c(args)
+    }
+
+    var key = c.toString() + JSON.stringify(args);
+
+    if(!componentRegistry.has(key)){
+
+        //not already in the registry, add it
+        var el = c(args);
+        componentRegistry.set(key, el);
+        return el
+    }else{
+        return componentRegistry.get(key)
+    }
+
+}
+
 
 var halfcab = function (config){
     //this default function is used for setting up client side and is not run on the server
@@ -263,6 +285,7 @@ var halfcab = function (config){
 var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
+exports.component = component;
 exports.formValid = formValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
