@@ -3,7 +3,7 @@ import dirtyChai from 'dirty-chai';
 import { noPreserveCache } from 'proxyquire';
 const proxyquire = noPreserveCache().noCallThru();
 chai.use(dirtyChai);
-import halfcab from './halfcab'
+import halfcab, { ssr, html } from './halfcab'
 
 describe('halfcab', function(){
 
@@ -13,20 +13,18 @@ describe('halfcab', function(){
         // })
     });
 
-    it('Fake 1', function(){
-        expect(true).to.equal(true)
+    it('Should produce a string when doing SSR', function(){
+        var { componentsString, stylesString } = ssr(html`
+            <div oninput=${() => {}}></div>
+        `)
+        expect(typeof componentsString === 'string').to.be.true()
     });
 
-    it('Fake 2', function(){
-        expect(true).to.equal(true)
-    });
-
-    it('Fake 3', function(){
-        expect(true).to.equal(true)
-    });
-
-    it('Fake 3', function(){
-        expect(true).to.equal(true)
+    it('Should produce an object when doing regular render', function(){
+        var el = html`
+            <div oninput=${() => {}}></div>
+        `
+        expect(typeof el === 'object').to.be.true()
     });
 
 });

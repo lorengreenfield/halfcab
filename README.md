@@ -17,7 +17,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, component, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab';
 ```
 
 ## Installation
@@ -49,6 +49,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 #### Components
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
+- `component` - wrapper function to increase performance of reusable components
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
@@ -130,6 +131,29 @@ export default args => html`
 
 ```
 Notice how you can use media queries, and inject variables using JavaScript! The CSS is scoped to your component so doesn't affect the rest of the app.
+
+
+If you want a bit of a performance boost with components that you know will be re-rendered quite often, use the `component` wrapper function. You can use this all components except the root one.
+
+```js
+import {html, formField, component} from 'halfcab'
+
+const singleField = ({holdingPen, name, property, styles, type, required, pattern}) => html`
+
+    <div class="mdc-textfield mdc-textfield--box mdc-textfield--upgraded" data-mdc-auto-init="MDCTextfield">
+        <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="mdc-textfield__input ${styles.input}" ${required ? `required` : ''} />
+        <label class="mdc-textfield__label">${name}</label>
+        <div class="mdc-textfield__bottom-line"></div>
+    </div>
+`
+
+export default args => component(singleField, args)
+```
+This essentially acts as a component cache. Notice that instead of just returning your component as the default function, you're simply creating a separate constant that holds the function, and then passing that function, along with the args, into the component wrapper function.
+
+You'll end up with slightly better performance than React (but not React Fibre) using the `component` wrapper. See the [halfcab Sierpinski Triangle example](https://resorts-interactive.com/uiperftest.html).
+
+It's worth mentioning here a second time, **don't wrap your root component**. Everything else is fine.
 
 
 #### Events
