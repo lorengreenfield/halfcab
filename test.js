@@ -4,6 +4,7 @@ import { noPreserveCache } from 'proxyquire';
 const proxyquire = noPreserveCache().noCallThru();
 chai.use(dirtyChai);
 import halfcab, { ssr, html } from './halfcab'
+import geb from './eventEmitter'
 
 describe('halfcab', function(){
 
