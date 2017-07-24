@@ -8,7 +8,7 @@ import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
 import marked from 'marked'
 import { AllHtmlEntities } from 'html-entities'
-import geb, { eventEmitter } from './eventEmitter'
+import geb, { eventEmitter } from './eventEmitter/index.js'
 
 var componentRegistry
 var entities = new AllHtmlEntities()

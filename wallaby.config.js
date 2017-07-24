@@ -4,13 +4,14 @@ module.exports = function(wallaby){
     return {
         files: [
             './package.json',
-            './eventEmitter.js',
+            './eventEmitter/index.js',
             './halfcab.js',
             '!./test.js',
         ],
         testFramework: 'mocha',
         tests: [
-            './test.js'
+            './test.js',
+            './eventEmitter/test.js'
         ],
         filesWithNoCoverageCalculated: ['./package.json', 'node_modules/*'],
         env: {

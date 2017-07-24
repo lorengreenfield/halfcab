@@ -1,34 +1,34 @@
-import ee from 'event-emitter';
-var events = ee({});
+import ee from 'event-emitter'
+var events = ee({})
 
 function eventEmitter(){
 
-    var noop = () => {};
+    var noop = () => {}
 
     if(typeof window !== 'undefined'){
         function broadcast(eventName, eventObject){
 
             //Set a break point on the following line to monitor all events being broadcast
-            console.log('Event broadcast: '+ eventName);
-            events.emit(eventName, eventObject);
+            console.log('Event broadcast: '+ eventName)
+            events.emit(eventName, eventObject)
         }
 
         function on(eventName, cb){
 
             //Set a break point on the following line to monitor all events being listened to
-            events.on(eventName, cb);
+            events.on(eventName, cb)
         }
 
         function once(eventName, cb){
 
             //Set a break point on the following line to monitor all events being listened to just once
-            events.once(eventName, cb);
+            events.once(eventName, cb)
         }
 
         function off(eventName, listenerFunction){
 
             //Set a break point on the following line to monitor all events being unlistened to
-            events.off(eventName, listenerFunction);
+            events.off(eventName, listenerFunction)
         }
 
         return {
@@ -48,5 +48,5 @@ function eventEmitter(){
 
 }
 
-export default new eventEmitter();
-export { eventEmitter };
+export default new eventEmitter()
+export { eventEmitter }
