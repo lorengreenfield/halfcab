@@ -6,7 +6,7 @@
   "module": "halfcab.js",
   "jsnext:main": "halfcab.js",
   "scripts": {
-    "test": "mocha --require reify test.js",
+    "test": "mocha --require reify test.js **/test.js",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "build": "rollup halfcab.js --format cjs --output dist/halfcab.js",
     "versionbump:fix": "npm version patch --no-git-tag-version",
