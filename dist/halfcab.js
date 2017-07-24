@@ -66,7 +66,7 @@ function eventEmitter(){
 
 }
 
-var eventEmitter$1 = new eventEmitter();
+var index = new eventEmitter();
 
 var componentRegistry;
 var entities = new htmlEntities.AllHtmlEntities();
@@ -290,7 +290,7 @@ exports.formValid = formValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
 exports.injectMarkdown = injectMarkdown;
-exports.geb = eventEmitter$1;
+exports.geb = index;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
 exports.html = html;
