@@ -32,17 +32,23 @@ import halfcab, { html, css, component, injectHTML, injectMarkdown, geb, eventEm
 This happens in the browser only:
 
 ```js
-import halfcab, { emptyBody } from 'halfcab';
+import halfcab, { emptyBody } from 'halfcab'
+import { autoInit } from 'material-components-web'
+
 halfcab({
     baseName: 'My company',//tab title base name
     baseApiPath: '/api/webroutes',
     components, //top level component module
+    postUpdate() {
+        autoInit(document, ()=>{})
+    }
 }).then( root => {
-    emptyBody();
-    document.body.appendChild(root);
+    emptyBody()
+    document.body.appendChild(root)
+    autoInit(document, ()=>{})
 }).catch(err => {
-    console.log(err);
-});
+    console.log(err)
+})
 ```
 Note the use of the utility function `emptyBody` to clear out the html body before appending the root element as a replacement.
 
@@ -480,4 +486,14 @@ Notice how we're wrapping the default function with cd.mdc - in the browser this
 This is our top level component, from here we're also pulling in three other components - topNav, body, and footer. This is the start of the tree-like component structure.
 
 ## Bundling
-halfcab doesn't need any special processing since it's all just JavaScript, CSS and HTML, but you'll want to bundle your files together. browserify, webpack, and rollup are all good choices, depending on your needs.
+halfcab doesn't need any special processing since it's all just JavaScript, CSS and HTML, but you'll want to bundle your files together for the forseeable future.
+
+## MDC-web tweaks
+As of Chrome v60 and material-components-web v0.16.0, re-rendering/morphing textfields can often end up with blurred labels.
+It's the will-change value causing the issue. You can globally turn this off for mdc-web labels with 
+```css
+.mdc-textfield__label {
+  will-change: unset !important;
+}
+
+```
