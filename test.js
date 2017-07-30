@@ -9,13 +9,13 @@ import decache from 'decache'
 let jsdom = jsdomGlobal()
 let halfcab
 let halfcabModule
-let { ssr, html, route, formField, component, updateState, injectMarkdown, formValid } = {}
+let { ssr, html, route, formField, component, updateState, injectMarkdown, formValid, emptyBody, css } = {}
 
 function serverMode(){
     jsdom && jsdom()
     decache('bel')
     halfcabModule = proxyquire('./halfcab', {})
-    ;({ ssr, html } = halfcabModule)
+    ;({ ssr, html, css } = halfcabModule)
 }
 
 function browserMode(){
@@ -25,7 +25,7 @@ function browserMode(){
     decache('bel')
     jsdom = jsdomGlobal()
     halfcabModule = proxyquire('./halfcab', {})
-    ;({ html, route, formField, component, updateState, injectMarkdown, formValid } = halfcabModule)
+    ;({ html, route, formField, component, updateState, injectMarkdown, formValid, emptyBody, css } = halfcabModule)
     halfcab = halfcabModule.default
 }
 
@@ -39,8 +39,13 @@ describe('halfcab', () =>{
         })
 
         it('Produces a string when doing SSR', () =>{
+            var style = css`
+                .myStyle {
+                    width: 100px;
+                }
+            `
             var { componentsString, stylesString } = ssr(html`
-            <div oninput=${() => {}}></div>
+            <div class="${style.myStyle}" oninput=${() => {}}></div>
         `)
             expect(typeof componentsString === 'string').to.be.true()
         })
@@ -94,6 +99,28 @@ describe('halfcab', () =>{
             })
         })
 
+        it('updating state without deepmerge overwrites objects', () =>{
+            var style = css`
+                .myStyle {
+                    width: 100px;
+                }
+            `
+            return halfcab({
+                baseName: 'Resorts Interactive',
+                baseApiPath: '/api/webroutes',
+                components(args){
+                    return html `<div class="${style.myStyle}">${args.testing.inner || ''}</div>`
+                }
+            })
+            .then(rootEl => {
+                updateState({testing: { inner: 'works'}})
+                updateState({testing: { inner2: 'works'}}, {
+                    deepMerge: false
+                })
+                expect(rootEl.innerHTML.indexOf('works')).to.equal(-1)
+            })
+        })
+
         it('injects external content without error', () =>{
             return halfcab({
                 baseName: 'Resorts Interactive',
@@ -103,6 +130,7 @@ describe('halfcab', () =>{
                 }
             })
             .then(rootEl => {
+                emptyBody()
                 expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
                 expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
             })
