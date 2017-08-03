@@ -196,7 +196,12 @@ describe('halfcab', () =>{
             })
 
             it('Validates a form without error', () =>{
-                var holdingPen = {};
+                var holdingPen = {
+                    test: '',
+                    [Symbol('valid')]: {
+                        test: false
+                    }
+                }
                 var output = formField(holdingPen, 'test')
                 var e = {
                     currentTarget: {
