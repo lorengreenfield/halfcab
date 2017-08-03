@@ -17,7 +17,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, component, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab';
+import halfcab, { html, css, component, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab'
 ```
 
 ## Installation
@@ -63,7 +63,7 @@ Under the hood, halfcab uses bel + mdc-nanomorph, which turns tagged template li
 
 Here's an example of a simple component:
 ```js
-import { html } from 'halfcab';
+import { html } from 'halfcab'
 
 export default args => html`
    
@@ -84,7 +84,7 @@ export default args => html`
              </div>
         </nav>
     </header> 
-`;
+`
 
 ```
 
@@ -92,9 +92,9 @@ This is just regular HTML with one twist - Using event handlers like onclick wil
 
 halfcab uses csjs for inline css, like so:
 ```js
-import { html, css } from 'halfcab';
+import { html, css } from 'halfcab'
 
-var cssVar = '#FFCC00';
+var cssVar = '#FFCC00'
 
 var styles = css`
     
@@ -112,7 +112,7 @@ var styles = css`
             flex-direction: column;
         }
     }
-`;
+`
 
 export default args => html`
    
@@ -133,7 +133,7 @@ export default args => html`
             </div>
         </nav>
     </header> 
-`;
+`
 
 ```
 Notice how you can use media queries, and inject variables using JavaScript! The CSS is scoped to your component so doesn't affect the rest of the app.
@@ -172,28 +172,28 @@ Most often you'll use broadcast and on.
 
 Listen for an event:
 ```js
-import { geb } from 'halfcab';
+import { geb } from 'halfcab'
 geb.on('doStuff', args => {
-    alert('Stuff happened');
-});
+    alert('Stuff happened')
+})
 ```
 
 Broadcast an event:
 ```js
-import { geb } from 'halfcab';
-geb.broadcast('doStuff', argsObject);
+import { geb } from 'halfcab'
+geb.broadcast('doStuff', argsObject)
 ```
 
 The off method will turn off listening to events, and you'll need a named function to reference, eg:
 ```js
 var myFunc = args => {
-    alert('Stuff happened from myFunc');
-};
-geb.on('doStuff', myFunc);
+    alert('Stuff happened from myFunc')
+}
+geb.on('doStuff', myFunc)
 
 //......sometime later on
 
-geb.off('doStuff', myFunc);
+geb.off('doStuff', myFunc)
 ```
 
 The `once` method is just like `on`, but once the event has been executed, it'll be switched off.
@@ -201,18 +201,18 @@ The `once` method is just like `on`, but once the event has been executed, it'll
 If you don't want your events to be global, new up an `eventEmitter` like so:
 
 ```js
-import { eventEmitter } from 'halfcab';
-var localEvents = new eventEmitter();
+import { eventEmitter } from 'halfcab'
+var localEvents = new eventEmitter()
 
 ```
-Then just use `localEvents` as you would `geb`;
+Then just use `localEvents` as you would `geb`
 
 #### State management
 - `state` - an object that contains the application state
 - `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
 
 ```js
-import { updateState, geb } from 'halfcab';
+import { updateState, geb } from 'halfcab'
 
 geb.on('fieldUpdate', newValue => {
     updateState({
@@ -222,11 +222,11 @@ geb.on('fieldUpdate', newValue => {
     }, {
         deepMerge: false//deep merging on by default, set to false to overwrite whole objects without merging
     })
-});
+})
 
 //....sometime later from somewhere else in the app
 
-geb.broadcast('fieldUpdate', 23);
+geb.broadcast('fieldUpdate', 23)
 
 ```
 
@@ -234,19 +234,26 @@ geb.broadcast('fieldUpdate', 23);
 - `cd` - an object to put client dependencies inside when running code in the browser (and equivalent empty mocks when doing server side rendering) *See the full example at the bottom of this document for usage*
 - `emptyBody` - used to clear out the entire HTML body in the browser, to replace what's been rendered on the server. *See example usage in the setup section*
 - `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated.
-- `formValid` - test if a holdingPen object's values are all valid. Halfcab will automatically populate a `valid` object within the holding pen that contains the same keys. The validity of these is best set when you define the holding pen's initial values.
+- `formValid` - test if a holdingPen object's values are all valid. Halfcab will automatically populate a `valid` object within the holding pen that contains the same keys - this can either be object.valid or object[Symbol('valid')]. The validity of these is best set when you define the holding pen's initial values.
 
 eg.
 
 ```js
-import {html, formField, formValid} from 'halfcab';
+import {html, formField, formValid} from 'halfcab'
 
-var holidingPen = {
+let holidingPen = {
     value: '',
-    valid: {
+    valid: { 
         value: true//The starting value is considered valid
     }
-};
+}
+//alternatively use holidingPen with a symbol valid object
+let holidingPen = {
+    value: '',
+    [Symbol('valid')]: { 
+        value: true//The starting value is considered valid
+    }
+}
 
 export default args => html`
     <main>
@@ -255,12 +262,12 @@ export default args => html`
             <label class="mdc-textfield__label" for="my-textfield">Hint text</label>
         </div>
     </main>
-`;
+`
 
 //...sometime later, perhaps when subitting the form
 
 if(!formValid(holdingPen)){
-    alert('Form not valid');
+    alert('Form not valid')
 }
 ```
 
@@ -294,10 +301,10 @@ halfcab tries not to force you to use a single solution for both server side and
 
 Create a new route:
 ```js
-import { route } from 'halfcab';
+import { route } from 'halfcab'
 route({path: '/reportpal', title: 'Report Pal', skipApiCall: true}, output =>{
     //do something
-});
+})
 ```
 Calling a route will also automatically make an API call to the route's name, prefixed with the `baseApiPath` property you used during setup by calling halfcab(). You can tell it to not make that call by setting `skipApiCall: true` in the options.
 
@@ -312,8 +319,8 @@ Once your routes are set up using the `route` function, there's two ways to tell
 
 2. Use the `router` function
 ```js
-import { router } from 'halfcab';
-router('/my-local-route');
+import { router } from 'halfcab'
+router('/my-local-route')
 ```
 
 ### Other things worth mentioning
@@ -344,30 +351,30 @@ route.js
 
 route.js could have a lot of other things going on ( it's up to you and your server side framework ) but the key part for us is that it runs:
 ```js
-import htmlTemplate from './htmlTemplate';
+import htmlTemplate from './htmlTemplate'
 
 //somewhere else in file after http GET request to the route comes in:
-htmlTemplate(someJSONData);
+htmlTemplate(someJSONData)
 
 ```
 
 htmlTemplate.js
 
 ```js
-import pack from '../../../package';
-import components from '../../../components';
-import { ssr, cd } from 'halfcab';
-import { minify } from 'html-minifier';
+import pack from '../../../package'
+import components from '../../../components'
+import { ssr, cd } from 'halfcab'
+import { minify } from 'html-minifier'
 
 cd.mdc = function(val){//mock the client libraries
 
-    return val;
-};
+    return val
+}
 
 function htmlOutput(data){
 
-    var apiData = data[0];
-	var { componentsString, stylesString } = ssr(components(apiData));
+    var apiData = data[0]
+	var { componentsString, stylesString } = ssr(components(apiData))
 	
     return `<!DOCTYPE html>
             <html lang="en">
@@ -390,7 +397,7 @@ function htmlOutput(data){
                 
                 </body>
             </html>
-`;
+`
 }
 
 
@@ -419,27 +426,27 @@ app.js
 ```
 app.js
 ```js
-import halfcab, { emptyBody, cd } from 'halfcab';
-import { autoInit } from 'material-components-web';
-import './server/**/client.js';//registers client routes
-import components from './components';
+import halfcab, { emptyBody, cd } from 'halfcab'
+import { autoInit } from 'material-components-web'
+import './server/**/client.js'//registers client routes
+import components from './components'
 
 function mdc(rootEl){
-    autoInit(rootEl);
-    return rootEl;
+    autoInit(rootEl)
+    return rootEl
 }
-cd.mdc = mdc;
+cd.mdc = mdc
 
 halfcab({
     baseName: 'Resorts Interactive',
     baseApiPath: '/api/webroutes',
     components
 }).then( root => {
-    emptyBody();
-    document.body.appendChild(root);
+    emptyBody()
+    document.body.appendChild(root)
 }).catch(err => {
-    console.log(err);
-});
+    console.log(err)
+})
 
 ```
 Notice:
@@ -449,10 +456,10 @@ Notice:
 ###### The common file between server and browser - components.js
 
 ```js
-import { html, cd } from 'halfcab';
-import topNav from './topNav';
-import body from './body';
-import footer from './footer';
+import { html, cd } from 'halfcab'
+import topNav from './topNav'
+import body from './body'
+import footer from './footer'
 
 function products(products){
 
@@ -478,7 +485,7 @@ export default args => cd.mdc(html`
         
         ${injectHTML(args.safeHTMLFromServer)}
     </div>
-`);
+`)
 ```
 
 Notice how we're wrapping the default function with cd.mdc - in the browser this results in autoInit being run on our element, and on the server, essentially does nothing but pass the element through.
