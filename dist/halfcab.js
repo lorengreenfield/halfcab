@@ -118,25 +118,47 @@ function formField(ob, prop){
 
     return e => {
         ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value;
-
+        let validOb;
         if(!ob.valid){
-            ob.valid = {};
+            if(Object.getOwnPropertySymbols(ob).length > 0){
+                Object.getOwnPropertySymbols(ob).forEach(symb => {
+                    if(symb.toString() === 'Symbol(valid)'){
+                        validOb = symb;
+                    }
+                });
+            }else{
+                ob.valid = {};
+                validOb = 'valid';
+            }
+
+        }else{
+            validOb = 'valid';
         }
-        ob.valid[prop] = e.currentTarget.validity.valid;
+        ob[validOb][prop] = e.currentTarget.validity.valid;
         console.log('---formField update---');
         console.log(prop, ob);
-        console.log(`Valid? ${ob.valid[prop]}`);
+        console.log(`Valid? ${ob[validOb][prop]}`);
     }
 }
 
 function formValid(holidingPen){
-    var validOb = Object.keys(holidingPen.valid);
-    if(!validOb){
-        return false
+    let validProp = holidingPen.valid && 'valid';
+    if(!validProp){
+        Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
+            if(symb.toString() === 'Symbol(valid)'){
+                validProp = symb;
+            }
+        });
+
+        if(!validProp){
+            return false
+        }
     }
 
+    let validOb = Object.keys(holidingPen[validProp]);
+
     for(var i = 0; i < validOb.length; i ++){
-        if(holidingPen.valid[validOb[i]] !== true){
+        if(holidingPen[validProp][validOb[i]] !== true){
             return false
         }
     }
