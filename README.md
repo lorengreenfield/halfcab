@@ -17,7 +17,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, component, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab'
 ```
 
 ## Installation
@@ -55,7 +55,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 #### Components
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
-- `component` - wrapper function to increase performance of reusable components
+- `cache` - wrapper function to increase performance of reusable components by caching them. Use later on in your project when making performance tweaks.
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
@@ -139,10 +139,10 @@ export default args => html`
 Notice how you can use media queries, and inject variables using JavaScript! The CSS is scoped to your component so doesn't affect the rest of the app.
 
 
-If you want a bit of a performance boost with components that you know will be re-rendered quite often, use the `component` wrapper function. You can use this all components except the root one.
+If you want a bit of a performance boost with components that you know will be re-rendered quite often, but won't change (args passed in will always be the same), use the `cache` wrapper function. You can use this with all components except the root one. This shouldn't be used to begin with as you often don't need it and it's best to keep things simple.
 
 ```js
-import {html, formField, component} from 'halfcab'
+import {html, formField, cache} from 'halfcab'
 
 const singleField = ({holdingPen, name, property, styles, type, required, pattern}) => html`
 
@@ -153,9 +153,9 @@ const singleField = ({holdingPen, name, property, styles, type, required, patter
     </div>
 `
 
-export default args => component(singleField, args)
+export default args => cache(singleField, args)
 ```
-This essentially acts as a component cache. Notice that instead of just returning your component as the default function, you're simply creating a separate constant that holds the function, and then passing that function, along with the args, into the component wrapper function.
+This essentially acts as a component cache. Notice that instead of just returning your component as the default function, you're simply creating a separate constant that holds the function, and then passing that function, along with the args, into the cache wrapper function.
 
 You'll end up with slightly better performance than React (but not React Fibre) using the `component` wrapper. See the [halfcab Sierpinski Triangle example](https://resorts-interactive.com/uiperftest.html).
 
