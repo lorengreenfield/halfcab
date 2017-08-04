@@ -10,17 +10,18 @@ import marked from 'marked'
 import { AllHtmlEntities } from 'html-entities'
 import geb, { eventEmitter } from './eventEmitter/index.js'
 
-var componentRegistry
-var entities = new AllHtmlEntities()
-var cssTag = cssInject
-var componentCSSString = ''
-var routesArray = []
-var baseApiPath = ''
-var state = {}
-var router
-var rootEl
-var components
-var postUpdate
+let componentRegistry
+let entities = new AllHtmlEntities()
+let cssTag = cssInject
+let componentCSSString = ''
+let routesArray = []
+let baseApiPath = ''
+let state = {}
+let router
+let rootEl
+let components
+let postUpdate
+let dataInitial
 
 marked.setOptions({
     breaks: true
@@ -28,22 +29,22 @@ marked.setOptions({
 
 if(typeof window !== 'undefined'){
     componentRegistry = new Map()
-    var routerObject = {router: {pathname: window.location.pathname}}
-    var dataInitial = document.querySelector('[data-initial]')
+    let routerObject = {router: {pathname: window.location.pathname}}
+    dataInitial = document.querySelector('[data-initial]')
     if(!!dataInitial){
         state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject)
     }
 }else{
 
     cssTag = (cssStrings, ...values) => {
-        var output = cssInject(cssStrings, ...values)
+        let output = cssInject(cssStrings, ...values)
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : ''
         return output
     }
 }
 
 function ssr(rootComponent){
-    var componentsString = `${rootComponent}`
+    let componentsString = `${rootComponent}`
     return { componentsString, stylesString: componentCSSString }
 }
 
@@ -100,7 +101,7 @@ function formValid(holidingPen){
 
     let validOb = Object.keys(holidingPen[validProp])
 
-    for(var i = 0; i < validOb.length; i ++){
+    for(let i = 0; i < validOb.length; i ++){
         if(holidingPen[validProp][validOb[i]] !== true){
             return false
         }
@@ -109,7 +110,7 @@ function formValid(holidingPen){
     return true
 }
 
-var waitingAlready = false
+let waitingAlready = false
 function debounce(func) {
     if(!waitingAlready){
         waitingAlready = true
@@ -154,7 +155,7 @@ function getApiData(config, r, params){
     //get data that the route needs first
     baseApiPath = config.baseApiPath || ''
     postUpdate = config.postUpdate
-    var startPromise
+    let startPromise
     if(r.skipApiCall){
 
         startPromise = Promise.resolve({data: { data: null }})
@@ -197,12 +198,12 @@ function component(c, args){
         return c(args)
     }
 
-    var key = c.toString() + JSON.stringify(args)
+    let key = c.toString() + JSON.stringify(args)
 
     if(!componentRegistry.has(key)){
 
         //not already in the registry, add it
-        var el = c(args)
+        let el = c(args)
         componentRegistry.set(key, el)
         return el
     }else{
@@ -217,7 +218,7 @@ export default function (config){
     components = config.components
     return new Promise((resolve, reject) => {
 
-        var routesFormatted = routesArray.map(r => [
+        let routesFormatted = routesArray.map(r => [
             r.path,
             (params) =>{
 
@@ -247,6 +248,6 @@ export default function (config){
     })
 }
 
-var cd = {}//empty object for storing client dependencies (or mocks or them on the server)
+let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 
-export {component, formValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http}
+export {component, component as cache, formValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http}

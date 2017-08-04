@@ -68,16 +68,17 @@ function eventEmitter(){
 
 var index = new eventEmitter();
 
-var componentRegistry;
-var entities = new htmlEntities.AllHtmlEntities();
+let componentRegistry;
+let entities = new htmlEntities.AllHtmlEntities();
 exports.css = cssInject;
-var componentCSSString = '';
-var routesArray = [];
-var baseApiPath = '';
+let componentCSSString = '';
+let routesArray = [];
+let baseApiPath = '';
 exports.state = {};
-var rootEl;
-var components;
-var postUpdate;
+let rootEl;
+let components;
+let postUpdate;
+let dataInitial;
 
 marked.setOptions({
     breaks: true
@@ -85,22 +86,22 @@ marked.setOptions({
 
 if(typeof window !== 'undefined'){
     componentRegistry = new Map();
-    var routerObject = {router: {pathname: window.location.pathname}};
-    var dataInitial = document.querySelector('[data-initial]');
+    let routerObject = {router: {pathname: window.location.pathname}};
+    dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
         exports.state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
     }
 }else{
 
     exports.css = (cssStrings, ...values) => {
-        var output = cssInject(cssStrings, ...values);
+        let output = cssInject(cssStrings, ...values);
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : '';
         return output
     };
 }
 
 function ssr(rootComponent){
-    var componentsString = `${rootComponent}`;
+    let componentsString = `${rootComponent}`;
     return { componentsString, stylesString: componentCSSString }
 }
 
@@ -157,7 +158,7 @@ function formValid(holidingPen){
 
     let validOb = Object.keys(holidingPen[validProp]);
 
-    for(var i = 0; i < validOb.length; i ++){
+    for(let i = 0; i < validOb.length; i ++){
         if(holidingPen[validProp][validOb[i]] !== true){
             return false
         }
@@ -166,7 +167,7 @@ function formValid(holidingPen){
     return true
 }
 
-var waitingAlready = false;
+let waitingAlready = false;
 function debounce(func) {
     if(!waitingAlready){
         waitingAlready = true;
@@ -211,7 +212,7 @@ function getApiData(config, r, params){
     //get data that the route needs first
     baseApiPath = config.baseApiPath || '';
     postUpdate = config.postUpdate;
-    var startPromise;
+    let startPromise;
     if(r.skipApiCall){
 
         startPromise = Promise.resolve({data: { data: null }});
@@ -254,12 +255,12 @@ function component(c, args){
         return c(args)
     }
 
-    var key = c.toString() + JSON.stringify(args);
+    let key = c.toString() + JSON.stringify(args);
 
     if(!componentRegistry.has(key)){
 
         //not already in the registry, add it
-        var el = c(args);
+        let el = c(args);
         componentRegistry.set(key, el);
         return el
     }else{
@@ -274,7 +275,7 @@ var halfcab = function (config){
     components = config.components;
     return new Promise((resolve, reject) => {
 
-        var routesFormatted = routesArray.map(r => [
+        let routesFormatted = routesArray.map(r => [
             r.path,
             (params) =>{
 
@@ -304,10 +305,11 @@ var halfcab = function (config){
     })
 };
 
-var cd = {};//empty object for storing client dependencies (or mocks or them on the server)
+let cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
 exports.component = component;
+exports.cache = component;
 exports.formValid = formValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
