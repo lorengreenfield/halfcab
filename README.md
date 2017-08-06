@@ -17,7 +17,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formValid, ssr, route, router, http } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -37,7 +37,6 @@ import { autoInit } from 'material-components-web'
 
 halfcab({
     baseName: 'My company',//tab title base name
-    baseApiPath: '/api/webroutes',
     components, //top level component module
     postUpdate() {
         autoInit(document, ()=>{})
@@ -294,33 +293,31 @@ state = {
 
 
 #### Browser routing
-- `route` - create a route
-- `router` - manually invoke a route ( otherwise, using `a` tags with href will do it for you )
+- `defineRoute` - create a route
+- `gotoRoute` - manually invoke a route ( otherwise, using `a` tags with href will do it for you )
 
 halfcab tries not to force you to use a single solution for both server side and browser routing. Provide your own server side routing and then use `route` for setting up browser routes from halfcab.
 
 Create a new route:
 ```js
-import { route } from 'halfcab'
-route({path: '/reportpal', title: 'Report Pal', skipApiCall: true}, output =>{
-    //do something
-})
+import { defineRoute } from 'halfcab'
+import myPageComponent from './myPageComponent'
+defineRoute({path: '/reportpal', title: 'Report Pal', component: myPageComponent, callback(routeInfo){
+    //this callback with route info is useful for making supplementary api calls
+    console.log(routeInfo)//routInfo contains params, hash, query, href, pathname
+}})
 ```
-Calling a route will also automatically make an API call to the route's name, prefixed with the `baseApiPath` property you used during setup by calling halfcab(). You can tell it to not make that call by setting `skipApiCall: true` in the options.
 
 The `path` option sets the route path. Remember to include a forward slash as the first character of the route or if jumping to another site, http(s)://.
 The title sets the HTML title of the page and tab when the route is hit.
 
-The trailing function is a callback that's executed when the route is hit. If you let the API be called, the callback will have a populated output argument with the result of any API call.
-
-
 Once your routes are set up using the `route` function, there's two ways to tell your app to go to that route.
 1. a-href - Just use `a` tags as you normally would with the `href` property and the router will pick that up and route the app. The bonus of this approach is that using href is an easy way to help crawlers find their way through your site, and if structured carefully, you can also have basic navigation without the need for running JavaScript in the browser.
 
-2. Use the `router` function
+2. Use the `gotoRoute` function
 ```js
-import { router } from 'halfcab'
-router('/my-local-route')
+import { gotoRoute } from 'halfcab'
+gotoRoute('/my-local-route')
 ```
 
 ### Other things worth mentioning
@@ -439,7 +436,6 @@ cd.mdc = mdc
 
 halfcab({
     baseName: 'Resorts Interactive',
-    baseApiPath: '/api/webroutes',
     components
 }).then( root => {
     emptyBody()

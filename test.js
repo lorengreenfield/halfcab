@@ -9,7 +9,7 @@ import decache from 'decache'
 let jsdom = jsdomGlobal()
 let halfcab
 let halfcabModule
-let { ssr, html, route, formField, component, updateState, injectMarkdown, formValid, emptyBody, css } = {}
+let { ssr, html, defineRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css } = {}
 
 function serverMode(){
     jsdom && jsdom()
@@ -25,7 +25,7 @@ function browserMode(){
     decache('bel')
     jsdom = jsdomGlobal()
     halfcabModule = proxyquire('./halfcab', {})
-    ;({ html, route, formField, component, updateState, injectMarkdown, formValid, emptyBody, css } = halfcabModule)
+    ;({ html, defineRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css } = halfcabModule)
     halfcab = halfcabModule.default
 }
 
@@ -65,7 +65,7 @@ describe('halfcab', () =>{
         })
 
         it('Produces an HTML element wrapping as a reusable component', () =>{
-            var el = component(() => html`
+            var el = cache(() => html`
                 <div oninput=${() => {}}></div>
             `, {})
             expect(el instanceof HTMLDivElement).to.be.true()
@@ -214,7 +214,7 @@ describe('halfcab', () =>{
                 }
                 output(e)
 
-                expect(formValid(holdingPen)).to.be.true()
+                expect(formIsValid(holdingPen)).to.be.true()
             })
         })
 

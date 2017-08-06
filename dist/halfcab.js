@@ -7,6 +7,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var sheetRouter = _interopDefault(require('sheet-router'));
 var href = _interopDefault(require('sheet-router/href'));
 var history = _interopDefault(require('sheet-router/history'));
+var createLocation = _interopDefault(require('sheet-router/create-location'));
 var html = _interopDefault(require('bel'));
 var update = _interopDefault(require('mdc-nanomorph'));
 var axios = require('axios');
@@ -16,6 +17,7 @@ var merge = _interopDefault(require('deepmerge'));
 var marked = _interopDefault(require('marked'));
 var htmlEntities = require('html-entities');
 var ee = _interopDefault(require('event-emitter'));
+var qs = _interopDefault(require('qs'));
 
 var events = ee({});
 
@@ -73,8 +75,8 @@ let entities = new htmlEntities.AllHtmlEntities();
 exports.css = cssInject;
 let componentCSSString = '';
 let routesArray = [];
-let baseApiPath = '';
 exports.state = {};
+let router;
 let rootEl;
 let components;
 let postUpdate;
@@ -86,10 +88,12 @@ marked.setOptions({
 
 if(typeof window !== 'undefined'){
     componentRegistry = new Map();
-    let routerObject = {router: {pathname: window.location.pathname}};
     dataInitial = document.querySelector('[data-initial]');
     if(!!dataInitial){
-        exports.state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject);
+        exports.state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)));
+        if(!exports.state.router.pathname){
+            Object.assign(exports.state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)});
+        }
     }
 }else{
 
@@ -105,8 +109,8 @@ function ssr(rootComponent){
     return { componentsString, stylesString: componentCSSString }
 }
 
-function route(routeObject, callback){
-    routesArray.push(Object.assign(routeObject, {callback}));
+function defineRoute(routeObject){
+    routesArray.push(routeObject);
 }
 
 function emptyBody(){
@@ -142,7 +146,7 @@ function formField(ob, prop){
     }
 }
 
-function formValid(holidingPen){
+function formIsValid(holidingPen){
     let validProp = holidingPen.valid && 'valid';
     if(!validProp){
         Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
@@ -208,39 +212,6 @@ function updateState(updateObject, options){
     }
 }
 
-function getApiData(config, r, params){
-    //get data that the route needs first
-    baseApiPath = config.baseApiPath || '';
-    postUpdate = config.postUpdate;
-    let startPromise;
-    if(r.skipApiCall){
-
-        startPromise = Promise.resolve({data: { data: null }});
-    }else{
-        startPromise = axios.get(`${baseApiPath}${r.path}`);
-    }
-    return startPromise
-        .then(data => {
-            r.callback({apiData: data.data, params});
-            if(window.location.pathname !== r.path){
-                window.history.pushState({path: r.path}, r.title, r.path);
-            }
-
-            updateState({
-                router: {
-                    pathname: r.path
-                }
-            }, {
-                deepMerge: true
-            });
-
-            document.title = r.path !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName;
-        })
-        .catch(err => {
-            console.log(err.toString());
-        })
-}
-
 function injectHTML(htmlString){
     return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
@@ -249,7 +220,7 @@ function injectMarkdown(mdString){
     return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
-function component(c, args){
+function cache(c, args){
 
     if(typeof window === 'undefined'){
         return c(args)
@@ -269,48 +240,78 @@ function component(c, args){
 
 }
 
+function gotoRoute(route){
+    let { pathname, hash, search, href: href$$1 } = createLocation({}, route);
+    let component = router(route, { pathname, hash, search, href: href$$1 });
+    updateState({
+        router: {
+            component
+        }
+    });
+}
+
+function getRouteComponent(pathname){
+    let foundRoute = routesArray.find(route => route.key === pathname || route.path === pathname);
+    return foundRoute && foundRoute.component
+}
+
 
 var halfcab = function (config){
     //this default function is used for setting up client side and is not run on the server
     components = config.components;
+    postUpdate = config.postUpdate;
     return new Promise((resolve, reject) => {
 
         let routesFormatted = routesArray.map(r => [
             r.path,
-            (params) =>{
+            (params, parts) =>{
 
-                getApiData(config, r, params);
+                r.callback && r.callback(Object.assign({}, parts, {params}));
+                if(parts && window.location.pathname !== parts.pathname){
+                    window.history.pushState({href: parts.href}, r.title, parts.href);
+                }
+
+                updateState({
+                    router: {
+                        pathname: parts.pathname,
+                        hash: parts.hash,
+                        query: qs.parse(parts.search),
+                        params,
+                        key: r.key || r.path
+                    }
+                }, {
+                    deepMerge: false
+                });
+
+                document.title = parts.pathname !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName;
+
+                return r.component
 
             }
 
         ]);
 
-        exports.router = sheetRouter({default: '/404'}, routesFormatted);
+        router = sheetRouter({default: '/404'}, routesFormatted);
 
-        href((location) =>{
-            exports.router(location.pathname);
+        href(location =>{
+            gotoRoute(location.href);
         });
 
-        history((location) => {
-            exports.router(location.pathname);
+        history(location => {
+            gotoRoute(location.href);
         });
 
-        getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
-            output.apiData.data && updateState(output.apiData);
-        }}).then(()=>{
-
-            rootEl = components(exports.state);
-            resolve(rootEl);//root element generated by components
-        });
+        rootEl = components(exports.state);
+        resolve(rootEl);//root element generated by components
     })
 };
 
 let cd = {};//empty object for storing client dependencies (or mocks or them on the server)
 
 exports['default'] = halfcab;
-exports.component = component;
-exports.cache = component;
-exports.formValid = formValid;
+exports.getRouteComponent = getRouteComponent;
+exports.cache = cache;
+exports.formIsValid = formIsValid;
 exports.ssr = ssr;
 exports.injectHTML = injectHTML;
 exports.injectMarkdown = injectMarkdown;
@@ -318,8 +319,9 @@ exports.geb = index;
 exports.eventEmitter = eventEmitter;
 exports.cd = cd;
 exports.html = html;
-exports.route = route;
+exports.defineRoute = defineRoute;
 exports.updateState = updateState;
 exports.emptyBody = emptyBody;
 exports.formField = formField;
+exports.gotoRoute = gotoRoute;
 exports.http = axios__default;

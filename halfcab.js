@@ -1,6 +1,7 @@
 import sheetRouter from 'sheet-router'
 import href from 'sheet-router/href'
 import history from 'sheet-router/history'
+import createLocation from 'sheet-router/create-location'
 import html from 'bel'
 import update from 'mdc-nanomorph'
 import axios, { get } from 'axios'
@@ -9,13 +10,13 @@ import merge from 'deepmerge'
 import marked from 'marked'
 import { AllHtmlEntities } from 'html-entities'
 import geb, { eventEmitter } from './eventEmitter/index.js'
+import qs from 'qs'
 
 let componentRegistry
 let entities = new AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
-let baseApiPath = ''
 let state = {}
 let router
 let rootEl
@@ -29,10 +30,12 @@ marked.setOptions({
 
 if(typeof window !== 'undefined'){
     componentRegistry = new Map()
-    let routerObject = {router: {pathname: window.location.pathname}}
     dataInitial = document.querySelector('[data-initial]')
     if(!!dataInitial){
-        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject)
+        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)))
+        if(!state.router.pathname){
+            Object.assign(state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)})
+        }
     }
 }else{
 
@@ -48,8 +51,8 @@ function ssr(rootComponent){
     return { componentsString, stylesString: componentCSSString }
 }
 
-function route(routeObject, callback){
-    routesArray.push(Object.assign(routeObject, {callback}))
+function defineRoute(routeObject){
+    routesArray.push(routeObject)
 }
 
 function emptyBody(){
@@ -85,7 +88,7 @@ function formField(ob, prop){
     }
 }
 
-function formValid(holidingPen){
+function formIsValid(holidingPen){
     let validProp = holidingPen.valid && 'valid'
     if(!validProp){
         Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
@@ -151,39 +154,6 @@ function updateState(updateObject, options){
     }
 }
 
-function getApiData(config, r, params){
-    //get data that the route needs first
-    baseApiPath = config.baseApiPath || ''
-    postUpdate = config.postUpdate
-    let startPromise
-    if(r.skipApiCall){
-
-        startPromise = Promise.resolve({data: { data: null }})
-    }else{
-        startPromise = get(`${baseApiPath}${r.path}`)
-    }
-    return startPromise
-        .then(data => {
-            r.callback({apiData: data.data, params})
-            if(window.location.pathname !== r.path){
-                window.history.pushState({path: r.path}, r.title, r.path)
-            }
-
-            updateState({
-                router: {
-                    pathname: r.path
-                }
-            }, {
-                deepMerge: true
-            })
-
-            document.title = r.path !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName
-        })
-        .catch(err => {
-            console.log(err.toString())
-        })
-}
-
 function injectHTML(htmlString){
     return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
@@ -192,7 +162,7 @@ function injectMarkdown(mdString){
     return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
-function component(c, args){
+function cache(c, args){
 
     if(typeof window === 'undefined'){
         return c(args)
@@ -212,17 +182,52 @@ function component(c, args){
 
 }
 
+function gotoRoute(route){
+    let { pathname, hash, search, href } = createLocation({}, route)
+    let component = router(route, { pathname, hash, search, href })
+    updateState({
+        router: {
+            component
+        }
+    })
+}
+
+function getRouteComponent(pathname){
+    let foundRoute = routesArray.find(route => route.key === pathname || route.path === pathname)
+    return foundRoute && foundRoute.component
+}
+
 
 export default function (config){
     //this default function is used for setting up client side and is not run on the server
     components = config.components
+    postUpdate = config.postUpdate
     return new Promise((resolve, reject) => {
 
         let routesFormatted = routesArray.map(r => [
             r.path,
-            (params) =>{
+            (params, parts) =>{
 
-                getApiData(config, r, params)
+                r.callback && r.callback(Object.assign({}, parts, {params}))
+                if(parts && window.location.pathname !== parts.pathname){
+                    window.history.pushState({href: parts.href}, r.title, parts.href)
+                }
+
+                updateState({
+                    router: {
+                        pathname: parts.pathname,
+                        hash: parts.hash,
+                        query: qs.parse(parts.search),
+                        params,
+                        key: r.key || r.path
+                    }
+                }, {
+                    deepMerge: false
+                })
+
+                document.title = parts.pathname !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName
+
+                return r.component
 
             }
 
@@ -230,24 +235,19 @@ export default function (config){
 
         router = sheetRouter({default: '/404'}, routesFormatted)
 
-        href((location) =>{
-            router(location.pathname)
+        href(location =>{
+            gotoRoute(location.href)
         })
 
-        history((location) => {
-            router(location.pathname)
+        history(location => {
+            gotoRoute(location.href)
         })
 
-        getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
-            output.apiData.data && updateState(output.apiData)
-        }}).then(()=>{
-
-            rootEl = components(state)
-            resolve(rootEl)//root element generated by components
-        })
+        rootEl = components(state)
+        resolve(rootEl)//root element generated by components
     })
 }
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 
-export {component, component as cache, formValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http}
+export {getRouteComponent, cache, formIsValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
