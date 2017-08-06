@@ -91,7 +91,7 @@ if(typeof window !== 'undefined'){
     if(!!dataInitial){
         exports.state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)));
         if(!exports.state.router.pathname){
-            Object.assign(exports.state.router, {pathname: window.location.pathname, query: window.location.search});
+            Object.assign(exports.state.router, {pathname: window.location.pathname, hash: window.location.hash, query: window.location.search});
         }
     }
 }else{
@@ -108,8 +108,8 @@ function ssr(rootComponent){
     return { componentsString, stylesString: componentCSSString }
 }
 
-function defineRoute(routeObject, callback){
-    routesArray.push(Object.assign(routeObject, {callback}));
+function defineRoute(routeObject){
+    routesArray.push(routeObject);
 }
 
 function emptyBody(){
@@ -224,7 +224,7 @@ function getApiData(config, r, params){
     }
     return startPromise
         .then(data => {
-            r.callback({apiData: data.data, params});
+            r.callback && r.callback({apiData: data.data, params});
             if(window.location.pathname !== r.path){
                 window.history.pushState({path: r.path}, r.title, r.path);
             }
@@ -318,7 +318,7 @@ var halfcab = function (config){
         });
 
         getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
-            output.apiData.data && updateState({data: {[location.pathname]: output.apiData.data}});
+            output.apiData.data && updateState(output.apiData);
         }}).then(()=>{
 
             rootEl = components(exports.state);

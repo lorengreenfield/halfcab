@@ -303,9 +303,7 @@ Create a new route:
 ```js
 import { defineRoute } from 'halfcab'
 import myPageComponent from './myPageComponent'
-defineRoute({path: '/reportpal', title: 'Report Pal', skipApiCall: true, component: myPageComponent}, output =>{
-    //do something
-})
+defineRoute({path: '/reportpal', title: 'Report Pal', skipApiCall: true, component: myPageComponent})
 ```
 Calling a route will also automatically make an API call to the route's name, prefixed with the `baseApiPath` property you used during setup by calling halfcab(). You can tell it to not make that call by setting `skipApiCall: true` in the options.
 
