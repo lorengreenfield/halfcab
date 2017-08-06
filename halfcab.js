@@ -29,10 +29,12 @@ marked.setOptions({
 
 if(typeof window !== 'undefined'){
     componentRegistry = new Map()
-    let routerObject = {router: {pathname: window.location.pathname}}
     dataInitial = document.querySelector('[data-initial]')
     if(!!dataInitial){
-        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)), routerObject)
+        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)))
+        if(!state.router.pathname){
+            Object.assign(state.router, {pathname: window.location.pathname, query: window.location.search})
+        }
     }
 }else{
 
@@ -48,7 +50,7 @@ function ssr(rootComponent){
     return { componentsString, stylesString: componentCSSString }
 }
 
-function route(routeObject, callback){
+function defineRoute(routeObject, callback){
     routesArray.push(Object.assign(routeObject, {callback}))
 }
 
@@ -85,7 +87,7 @@ function formField(ob, prop){
     }
 }
 
-function formValid(holidingPen){
+function formIsValid(holidingPen){
     let validProp = holidingPen.valid && 'valid'
     if(!validProp){
         Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
@@ -192,7 +194,7 @@ function injectMarkdown(mdString){
     return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
-function component(c, args){
+function cache(c, args){
 
     if(typeof window === 'undefined'){
         return c(args)
@@ -212,6 +214,22 @@ function component(c, args){
 
 }
 
+function gotoRoute(route){
+    return router(route)
+        .then((component) => {
+            updateState({
+                router: {
+                    component
+                }
+            })
+        })
+}
+
+function getRouteComponent(pathname){
+    let foundRoute = routesArray.find(route => route.path === pathname)
+    return foundRoute && foundRoute.component
+}
+
 
 export default function (config){
     //this default function is used for setting up client side and is not run on the server
@@ -220,9 +238,12 @@ export default function (config){
 
         let routesFormatted = routesArray.map(r => [
             r.path,
-            (params) =>{
+            params =>{
 
-                getApiData(config, r, params)
+                return getApiData(config, r, params)
+                    .then(() => {
+                        return r.component
+                    })
 
             }
 
@@ -231,15 +252,15 @@ export default function (config){
         router = sheetRouter({default: '/404'}, routesFormatted)
 
         href((location) =>{
-            router(location.pathname)
+            router(location.href)
         })
 
         history((location) => {
-            router(location.pathname)
+            router(location.href)
         })
 
         getApiData(config, { skipApiCall: !!dataInitial, path: location.pathname, callback: (output) => {
-            output.apiData.data && updateState(output.apiData)
+            output.apiData.data && updateState({data: {[location.pathname]: output.apiData.data}})
         }}).then(()=>{
 
             rootEl = components(state)
@@ -250,4 +271,4 @@ export default function (config){
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 
-export {component, component as cache, formValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, route, updateState, emptyBody, formField, router, cssTag as css, axios as http}
+export {getRouteComponent, cache, formIsValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
