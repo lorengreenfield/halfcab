@@ -17,7 +17,6 @@ let entities = new AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
-let baseApiPath = ''
 let state = {}
 let router
 let rootEl
