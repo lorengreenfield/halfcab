@@ -37,7 +37,6 @@ import { autoInit } from 'material-components-web'
 
 halfcab({
     baseName: 'My company',//tab title base name
-    baseApiPath: '/api/webroutes',
     components, //top level component module
     postUpdate() {
         autoInit(document, ()=>{})
@@ -303,15 +302,14 @@ Create a new route:
 ```js
 import { defineRoute } from 'halfcab'
 import myPageComponent from './myPageComponent'
-defineRoute({path: '/reportpal', title: 'Report Pal', skipApiCall: true, component: myPageComponent})
+defineRoute({path: '/reportpal', title: 'Report Pal', component: myPageComponent, callback(routeInfo){
+    //this callback with route info is useful for making supplementary api calls
+    console.log(routeInfo)//routInfo contains params, hash, query, href, pathname
+}})
 ```
-Calling a route will also automatically make an API call to the route's name, prefixed with the `baseApiPath` property you used during setup by calling halfcab(). You can tell it to not make that call by setting `skipApiCall: true` in the options.
 
 The `path` option sets the route path. Remember to include a forward slash as the first character of the route or if jumping to another site, http(s)://.
 The title sets the HTML title of the page and tab when the route is hit.
-
-The trailing function is a callback that's executed when the route is hit. If you let the API be called, the callback will have a populated output argument with the result of any API call.
-
 
 Once your routes are set up using the `route` function, there's two ways to tell your app to go to that route.
 1. a-href - Just use `a` tags as you normally would with the `href` property and the router will pick that up and route the app. The bonus of this approach is that using href is an easy way to help crawlers find their way through your site, and if structured carefully, you can also have basic navigation without the need for running JavaScript in the browser.
@@ -438,7 +436,6 @@ cd.mdc = mdc
 
 halfcab({
     baseName: 'Resorts Interactive',
-    baseApiPath: '/api/webroutes',
     components
 }).then( root => {
     emptyBody()

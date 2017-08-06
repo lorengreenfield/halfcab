@@ -212,31 +212,6 @@ function updateState(updateObject, options){
     }
 }
 
-// function getApiData(config, r, params, parts){
-//     //get data that the route needs first
-//     baseApiPath = config.baseApiPath || ''
-//     postUpdate = config.postUpdate
-//
-//     r.callback && r.callback({apiData: data.data, params})
-//     if(parts && window.location.pathname !== parts.pathname){
-//         window.history.pushState({href: parts.href}, r.title, parts.pathname)
-//     }else{
-//         parts = location
-//     }
-//
-//     updateState({
-//         router: {
-//             pathname: parts.pathname,
-//             hash: parts.hash,
-//             query: parts.search,
-//             params,
-//             key: r.key || r.path
-//         }
-//     })
-//
-//     document.title = parts.pathname !== '' && r.title ? `${config.baseName} - ${r.title}`: config.baseName
-// }
-
 function injectHTML(htmlString){
     return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
@@ -291,7 +266,7 @@ var halfcab = function (config){
             r.path,
             (params, parts) =>{
 
-                r.callback && r.callback(Object.assign({}, {params, parts}));
+                r.callback && r.callback(Object.assign({}, parts, {params}));
                 if(parts && window.location.pathname !== parts.pathname){
                     window.history.pushState({href: parts.href}, r.title, parts.href);
                 }
