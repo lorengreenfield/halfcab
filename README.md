@@ -302,7 +302,8 @@ halfcab tries not to force you to use a single solution for both server side and
 Create a new route:
 ```js
 import { defineRoute } from 'halfcab'
-defineRoute({path: '/reportpal', title: 'Report Pal', skipApiCall: true}, output =>{
+import myPageComponent from './myPageComponent'
+defineRoute({path: '/reportpal', title: 'Report Pal', skipApiCall: true, component: myPageComponent}, output =>{
     //do something
 })
 ```
