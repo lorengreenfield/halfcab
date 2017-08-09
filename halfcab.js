@@ -33,6 +33,11 @@ if(typeof window !== 'undefined'){
     dataInitial = document.querySelector('[data-initial]')
     if(!!dataInitial){
         state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)))
+
+        if(!state.router){
+            state.router = {}
+        }
+
         if(!state.router.pathname){
             Object.assign(state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)})
         }
