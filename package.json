@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "dist/halfcab.js",
   "module": "halfcab.js",
@@ -47,18 +47,19 @@
     "proxyquire": "^1.8.0",
     "reify": "^0.12.0",
     "rollup": "^0.47.6",
-    "sinon": "^3.2.0",
-    "sinon-chai": "^2.12.0"
+    "sinon": "^3.2.1",
+    "sinon-chai": "^2.13.0"
   },
   "dependencies": {
     "axios": "^0.16.2",
     "bel": "^5.0.3",
     "csjs-inject": "^1.0.1",
-    "deepmerge": "^1.5.0",
+    "deepmerge": "^1.5.1",
     "event-emitter": "^0.3.5",
     "html-entities": "^1.2.1",
     "marked": "^0.3.6",
     "mdc-nanomorph": "^0.1.1",
+    "qs": "^6.5.0",
     "sheet-router": "^4.2.3"
   }
 }
