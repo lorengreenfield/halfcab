@@ -141,7 +141,14 @@ function updateState(updateObject, options){
         if(options && options.deepMerge === false){
             Object.assign(state, updateObject)
         }else{
-            state = merge(state, updateObject)
+            let deepMergeOptions = {}
+            if(options && options.arrayMerge === false){
+                deepMergeOptions.arrayMerge = (destinationArray, sourceArray, options) => {
+                    //don't merge arrays, just return the new one
+                    return sourceArray
+                }
+            }
+            state = merge(state, updateObject, deepMergeOptions)
         }
     }
 
