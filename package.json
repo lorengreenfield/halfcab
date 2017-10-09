@@ -54,7 +54,7 @@
     "axios": "^0.16.2",
     "bel": "^5.1.1",
     "csjs-inject": "^1.0.1",
-    "deepmerge": "^1.5.1",
+    "deepmerge": "^2.0.0",
     "event-emitter": "^0.3.5",
     "html-entities": "^1.2.1",
     "marked": "^0.3.6",
