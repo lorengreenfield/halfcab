@@ -202,7 +202,7 @@ var localEvents = new eventEmitter()
 Then just use `localEvents` as you would `geb`
 
 #### State management
-- `state` - an object that contains the application state
+- `state` - an object that contains the application state (Read only. Use updateState to make state changes)
 - `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
 
 ```js
