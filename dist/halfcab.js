@@ -202,11 +202,10 @@ function updateState(updateObject, options){
 
     if(updateObject){
         if(options && options.deepMerge === false){
-            exports.state = Object.assign({}, exports.state, updateObject);
+            Object.assign({}, exports.state, updateObject);
         }else{
             exports.state = merge(Object.assign({}, exports.state), updateObject);
         }
-        deepFreeze(exports.state);
     }
 
     debounce(stateUpdated);

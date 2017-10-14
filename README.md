@@ -214,7 +214,8 @@ geb.on('fieldUpdate', newValue => {
             value: newValue
         }
     }, {
-        deepMerge: false//deep merging on by default, set to false to overwrite whole objects without merging
+        deepMerge: false, //deep merging on by default, set to false to overwrite whole objects without merging
+        arrayMerge: false //if deep merging then arrays will also merge by default. Set to false to not merge arrays.
     })
 })
 
