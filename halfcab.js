@@ -3,7 +3,7 @@ import href from 'sheet-router/href'
 import history from 'sheet-router/history'
 import createLocation from 'sheet-router/create-location'
 import html from 'bel'
-import update from 'mdc-nanomorph'
+import update from 'nanomorph'
 import axios, { get } from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
@@ -11,6 +11,7 @@ import marked from 'marked'
 import { AllHtmlEntities } from 'html-entities'
 import geb, { eventEmitter } from './eventEmitter/index.js'
 import qs from 'qs'
+import deepFreeze from 'deep-freeze'
 
 let componentRegistry
 let entities = new AllHtmlEntities()
@@ -41,7 +42,11 @@ if(typeof window !== 'undefined'){
         if(!state.router.pathname){
             Object.assign(state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)})
         }
+
+        //encourage state updates with updateState instead of direct access to state, by making state object immutable
+
     }
+    deepFreeze(state)
 }else{
 
     cssTag = (cssStrings, ...values) => {
@@ -139,10 +144,11 @@ function updateState(updateObject, options){
 
     if(updateObject){
         if(options && options.deepMerge === false){
-            Object.assign(state, updateObject)
+            state = Object.assign({}, state, updateObject)
         }else{
-            state = merge(state, updateObject)
+            state = merge(Object.assign({}, state), updateObject)
         }
+        deepFreeze(state)
     }
 
     debounce(stateUpdated)

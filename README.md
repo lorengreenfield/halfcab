@@ -11,7 +11,6 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 - Components contain JS, HTML and CSS altogether in one file
 - Both browser and server side component rendering
 - Easy state management
-- Built to work with material-components-web (UI components)
 
 
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
@@ -33,18 +32,17 @@ This happens in the browser only:
 
 ```js
 import halfcab, { emptyBody } from 'halfcab'
-import { autoInit } from 'material-components-web'
 
 halfcab({
     baseName: 'My company',//tab title base name
     components, //top level component module
     postUpdate() {
-        autoInit(document, ()=>{})
+        //do something after each dom update
     }
 }).then( root => {
     emptyBody()
     document.body.appendChild(root)
-    autoInit(document, ()=>{})
+    //run init function here
 }).catch(err => {
     console.log(err)
 })
@@ -58,7 +56,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
-Under the hood, halfcab uses bel + mdc-nanomorph, which turns tagged template literals into dom elements.
+Under the hood, halfcab uses bel + nanomorph, which turns tagged template literals into dom elements.
 
 Here's an example of a simple component:
 ```js
@@ -77,8 +75,7 @@ export default args => html`
                 <button onclick=${e => {
                 alert('I am a button')
                 }} 
-                data-mdc-auto-init="MDCRipple" 
-                class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
+                >Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
                 </button>         
              </div>
         </nav>
@@ -125,9 +122,7 @@ export default args => html`
                         
                 <button onclick=${e => {
                 alert('I am a button')
-                }} 
-                data-mdc-auto-init="MDCRipple" 
-                class="mdc-button mdc-button--raised mdc-button--accent">Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
+                }}>Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
                 </button>           
             </div>
         </nav>
@@ -145,10 +140,10 @@ import {html, formField, cache} from 'halfcab'
 
 const singleField = ({holdingPen, name, property, styles, type, required, pattern}) => html`
 
-    <div class="mdc-textfield mdc-textfield--box mdc-textfield--upgraded" data-mdc-auto-init="MDCTextfield">
-        <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="mdc-textfield__input ${styles.input}" ${required ? `required` : ''} />
-        <label class="mdc-textfield__label">${name}</label>
-        <div class="mdc-textfield__bottom-line"></div>
+    <div>
+        <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="${styles.input}" ${required ? `required` : ''} />
+        <label>${name}</label>
+        <div></div>
     </div>
 `
 
@@ -256,9 +251,9 @@ let holidingPen = {
 
 export default args => html`
     <main>
-        <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
-            <input type="text" class="mdc-textfield__input" oninput=${formField(holidingPen, 'value')}>
-            <label class="mdc-textfield__label" for="my-textfield">Hint text</label>
+        <div>
+            <input type="text" oninput=${formField(holidingPen, 'value')}>
+            <label for="my-textfield">Hint text</label>
         </div>
     </main>
 `
@@ -325,10 +320,6 @@ gotoRoute('/my-local-route')
 #### Network requests
 halfcab uses `axios` internally for api calls and exports this as the `http` object for use in your own code. *See the axios docs on how to use it*
 
-#### UI library
-halfcab is designed to work with the excellent material-components-web library.
-Use the `cd` object to include it as a client (browser) dependency. *See the full example below for usage*
-
 
 ### Putting it all together and structuring your code
 
@@ -363,7 +354,7 @@ import components from '../../../components'
 import { ssr, cd } from 'halfcab'
 import { minify } from 'html-minifier'
 
-cd.mdc = function(val){//mock the client libraries
+cd.mock = function(val){//mock the client libraries
 
     return val
 }
@@ -388,7 +379,7 @@ function htmlOutput(data){
                   
                    
                 </head>
-                <body class="mdc-typography" style="padding: 0px; margin: 0px;">
+                <body style="padding: 0px; margin: 0px;">
                 
                 ${componentsString}
                 
@@ -407,7 +398,7 @@ export default function(data){
 }
 ```
 
-Notice we're also using the `cd` object to pass in a mock of our material-components-web wrapper function. It's just a function that returns the argument that's passed in.
+Notice we're also using the `cd` object to pass in a mock of our function. It's just a function that returns the argument that's passed in.
 
 ###### Browser JS structure
 
@@ -424,15 +415,14 @@ app.js
 app.js
 ```js
 import halfcab, { emptyBody, cd } from 'halfcab'
-import { autoInit } from 'material-components-web'
 import './server/**/client.js'//registers client routes
 import components from './components'
+import someBrowserOnlyLib from 'someBrowserOnlyLib'
 
-function mdc(rootEl){
-    autoInit(rootEl)
-    return rootEl
+cd.mock = rootEl => {
+    someBrowserOnlyLib()
+        return rootEl
 }
-cd.mdc = mdc
 
 halfcab({
     baseName: 'Resorts Interactive',
@@ -446,7 +436,7 @@ halfcab({
 
 ```
 Notice:
-1. This browser code is also creating an mdc function to add to the cd object, but this time, it's actually importing the real material-components-web library and using the autoInit feature, before returning the element.
+1. This browser code is also creating an mock function to add to the cd object, but this time, it's actually importing the real someBrowserOnlyLib library and using it before returning the element.
 2. The halfcab function returns a promise that returns our root element ready for us to use.
 
 ###### The common file between server and browser - components.js
@@ -466,7 +456,7 @@ function products(products){
     }
 }
 
-export default args => cd.mdc(html`
+export default args => cd.mock(html`
     <div id="root" style="margin-top: 10px; text-align: center;">
         ${topNav({
             company: args.company,
@@ -484,19 +474,10 @@ export default args => cd.mdc(html`
 `)
 ```
 
-Notice how we're wrapping the default function with cd.mdc - in the browser this results in autoInit being run on our element, and on the server, essentially does nothing but pass the element through.
+Notice how we're wrapping the default function with cd.mock - in the browser this results in autoInit being run on our element, and on the server, essentially does nothing but pass the element through.
 
 This is our top level component, from here we're also pulling in three other components - topNav, body, and footer. This is the start of the tree-like component structure.
 
-## Bundling
-halfcab doesn't need any special processing since it's all just JavaScript, CSS and HTML, but you'll want to bundle your files together for the forseeable future.
 
-## MDC-web tweaks
-As of Chrome v60 and material-components-web v0.16.0, re-rendering/morphing textfields can often end up with blurred labels.
-It's the will-change value causing the issue. You can globally turn this off for mdc-web labels with 
-```css
-.mdc-textfield__label {
-  will-change: unset !important;
-}
 
 ```
