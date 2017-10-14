@@ -202,9 +202,17 @@ function updateState(updateObject, options){
 
     if(updateObject){
         if(options && options.deepMerge === false){
-            Object.assign({}, exports.state, updateObject);
+            exports.state = Object.assign({}, exports.state, updateObject);
         }else{
-            exports.state = merge(Object.assign({}, exports.state), updateObject);
+            let deepMergeOptions = {};
+            if(options && options.arrayMerge === false){
+                deepMergeOptions.arrayMerge = (destinationArray, sourceArray, options) => {
+                    //don't merge arrays, just return the new one
+                    return sourceArray
+                };
+            }
+            exports.state = merge(Object.assign({}, exports.state), updateObject, deepMergeOptions);
+            deepFreeze(exports.state);
         }
     }
 
