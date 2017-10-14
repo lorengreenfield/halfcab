@@ -9,7 +9,7 @@ var href = _interopDefault(require('sheet-router/href'));
 var history = _interopDefault(require('sheet-router/history'));
 var createLocation = _interopDefault(require('sheet-router/create-location'));
 var html = _interopDefault(require('bel'));
-var update = _interopDefault(require('mdc-nanomorph'));
+var update = _interopDefault(require('nanomorph'));
 var axios = require('axios');
 var axios__default = _interopDefault(axios);
 var cssInject = _interopDefault(require('csjs-inject'));
@@ -18,6 +18,7 @@ var marked = _interopDefault(require('marked'));
 var htmlEntities = require('html-entities');
 var ee = _interopDefault(require('event-emitter'));
 var qs = _interopDefault(require('qs'));
+var deepFreeze = _interopDefault(require('deep-freeze'));
 
 var events = ee({});
 
@@ -99,7 +100,11 @@ if(typeof window !== 'undefined'){
         if(!exports.state.router.pathname){
             Object.assign(exports.state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)});
         }
+
+        //encourage state updates with updateState instead of direct access to state, by making state object immutable
+
     }
+    deepFreeze(exports.state);
 }else{
 
     exports.css = (cssStrings, ...values) => {
@@ -197,7 +202,7 @@ function updateState(updateObject, options){
 
     if(updateObject){
         if(options && options.deepMerge === false){
-            Object.assign(exports.state, updateObject);
+            exports.state = Object.assign({}, exports.state, updateObject);
         }else{
             let deepMergeOptions = {};
             if(options && options.arrayMerge === false){
@@ -206,7 +211,8 @@ function updateState(updateObject, options){
                     return sourceArray
                 };
             }
-            exports.state = merge(exports.state, updateObject, deepMergeOptions);
+            exports.state = merge(Object.assign({}, exports.state), updateObject, deepMergeOptions);
+            deepFreeze(exports.state);
         }
     }
 
