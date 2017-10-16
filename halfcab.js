@@ -19,6 +19,7 @@ let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
 let state = {}
+let frozenState = {}
 let router
 let rootEl
 let components
@@ -42,11 +43,8 @@ if(typeof window !== 'undefined'){
         if(!state.router.pathname){
             Object.assign(state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)})
         }
-
-        //encourage state updates with updateState instead of direct access to state, by making state object immutable
-
     }
-    deepFreeze(state)
+    freezeState()
 }else{
 
     cssTag = (cssStrings, ...values) => {
@@ -139,6 +137,10 @@ function stateUpdated(){
     postUpdate && postUpdate()
 }
 
+function freezeState(){
+    frozenState = merge({}, state)//clone
+    deepFreeze(frozenState)
+}
 
 function updateState(updateObject, options){
 
@@ -156,7 +158,7 @@ function updateState(updateObject, options){
             state = merge(Object.assign({}, state), updateObject, deepMergeOptions)
 
         }
-        deepFreeze(state)
+        freezeState()
     }
 
     debounce(stateUpdated)
@@ -269,4 +271,4 @@ export default function (config){
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 
-export {getRouteComponent, cache, formIsValid, ssr, injectHTML, injectMarkdown, state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
+export {getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, frozenState as state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}

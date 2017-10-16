@@ -16,7 +16,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -202,8 +202,9 @@ var localEvents = new eventEmitter()
 Then just use `localEvents` as you would `geb`
 
 #### State management
-- `state` - an object that contains the application state (Read only. Use updateState to make state changes)
+- `state` - an object that contains the application state (Read only version of the global state. Use updateState to make state changes)
 - `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
+- `rerender` - The global state is passed into the root component and is mutable, if you want to make deep changes within a component by mutating the state directly without using updateState, you can do so, followed by `rerender()`. By comparison, updateState merges/mutates the state and then runs rerender for you.
 
 ```js
 import { updateState, geb } from 'halfcab'
