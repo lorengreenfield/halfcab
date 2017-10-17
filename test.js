@@ -9,7 +9,7 @@ import decache from 'decache'
 let jsdom = jsdomGlobal()
 let halfcab
 let halfcabModule
-let { ssr, html, defineRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css } = {}
+let { ssr, html, defineRoute, formField, cache, updateState, injectMarkdown, injectHTMLFlat, injectHTML, formIsValid, emptyBody, css } = {}
 
 function serverMode(){
     jsdom && jsdom()
@@ -25,7 +25,7 @@ function browserMode(){
     decache('bel')
     jsdom = jsdomGlobal()
     halfcabModule = proxyquire('./halfcab', {})
-    ;({ html, defineRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css } = halfcabModule)
+    ;({ html, defineRoute, formField, cache, updateState, injectMarkdown, injectHTMLFlat, injectHTML, formIsValid, emptyBody, css } = halfcabModule)
     halfcab = halfcabModule.default
 }
 
@@ -132,6 +132,40 @@ describe('halfcab', () =>{
             .then(rootEl => {
                 emptyBody()
                 expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
+                expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
+            })
+        })
+
+        it('injects html with a wrapping div', () => {
+            return halfcab({
+                baseName: 'Resorts Interactive',
+                baseApiPath: '/api/webroutes',
+                components(args){
+                    return html `<div>${injectHTML('<h3>Heading</h3>')}</div>`
+                }
+            })
+            .then(rootEl => {
+                console.log(rootEl.innerHTML)
+                emptyBody()
+                expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
+                expect(rootEl.innerHTML.indexOf('<div')).not.to.equal(-1)
+                expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
+            })
+        })
+
+        it('injects html flat with no wrapping div', () => {
+            return halfcab({
+                baseName: 'Resorts Interactive',
+                baseApiPath: '/api/webroutes',
+                components(args){
+                    return html `<div>${injectHTMLFlat('<h3>Heading</h3>')}</div>`
+                }
+            })
+            .then(rootEl => {
+                console.log(rootEl.innerHTML)
+                emptyBody()
+                expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
+                expect(rootEl.innerHTML.indexOf('<div')).to.equal(-1)
                 expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
             })
         })
