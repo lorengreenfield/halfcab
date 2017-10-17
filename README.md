@@ -56,6 +56,14 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
+
+Both injectHTML and injectMarkdown have a second argument for options. Currently there's just a single option:
+
+```{wrapper: false}``` (default is true)
+
+By default injected html will have a wrapping <div>. This is to ensure an html element can successfully be made (required by bel/hyperX)
+If you know that your HTML already has a wrapping element, or it's just a single element, you can set the wrapper to false. Particularly useful when dealing with SVGs.
+
 Under the hood, halfcab uses bel + nanomorph, which turns tagged template literals into dom elements.
 
 Here's an example of a simple component:
