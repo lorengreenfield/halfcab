@@ -179,6 +179,10 @@ function injectHTML(htmlString){
     return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
+function injectHTMLFlat(htmlString) {
+    return html(htmlString)
+}
+
 function injectMarkdown(mdString){
     return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
@@ -271,4 +275,4 @@ export default function (config){
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 
-export {getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, frozenState as state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
+export {getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectHTMLFlat, injectMarkdown, frozenState as state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
