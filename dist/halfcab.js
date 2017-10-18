@@ -233,12 +233,15 @@ function updateState(updateObject, options){
     }
 }
 
-function injectHTML(htmlString){
+function injectHTML(htmlString, options){
+    if(options && options.wrapper === false){
+        return html([htmlString])
+    }
     return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
-function injectMarkdown(mdString){
-    return injectHTML(entities.decode(marked(mdString)))//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+function injectMarkdown(mdString, options){
+    return injectHTML(entities.decode(marked(mdString)), options)//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function cache(c, args){
