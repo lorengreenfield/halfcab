@@ -11,7 +11,6 @@ import marked from 'marked'
 import { AllHtmlEntities } from 'html-entities'
 import geb, { eventEmitter } from './eventEmitter/index.js'
 import qs from 'qs'
-import deepFreeze from 'deep-freeze'
 
 let componentRegistry
 let entities = new AllHtmlEntities()
@@ -19,7 +18,6 @@ let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
 let state = {}
-let frozenState = {}
 let router
 let rootEl
 let components
@@ -44,7 +42,6 @@ if(typeof window !== 'undefined'){
             Object.assign(state.router, {pathname: window.location.pathname, hash: window.location.hash, query: qs.parse(window.location.search)})
         }
     }
-    freezeState()
 }else{
 
     cssTag = (cssStrings, ...values) => {
@@ -137,16 +134,11 @@ function stateUpdated(){
     postUpdate && postUpdate()
 }
 
-function freezeState(){
-    frozenState = merge({}, state)//clone
-    deepFreeze(frozenState)
-}
-
 function updateState(updateObject, options){
 
     if(updateObject){
         if(options && options.deepMerge === false){
-            state = Object.assign({}, state, updateObject)
+            Object.assign(state, updateObject)
         }else{
             let deepMergeOptions = {}
             if(options && options.arrayMerge === false){
@@ -155,10 +147,8 @@ function updateState(updateObject, options){
                     return sourceArray
                 }
             }
-            state = merge(Object.assign({}, state), updateObject, deepMergeOptions)
-
+            Object.assign(state, merge(state, updateObject, deepMergeOptions))
         }
-        freezeState()
     }
 
     debounce(stateUpdated)
@@ -273,5 +263,4 @@ export default function (config){
 }
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
-
-export {getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, frozenState as state, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
+export {state, getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
