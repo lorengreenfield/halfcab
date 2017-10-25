@@ -2,7 +2,7 @@ import sheetRouter from 'sheet-router'
 import href from 'sheet-router/href'
 import history from 'sheet-router/history'
 import createLocation from 'sheet-router/create-location'
-import html from 'bel'
+import bel from 'bel'
 import update from 'nanomorph'
 import axios, { get } from 'axios'
 import cssInject from 'csjs-inject'
@@ -49,6 +49,20 @@ if(typeof window !== 'undefined'){
         componentCSSString += componentCSSString.indexOf(output[' css ']) === -1 ? output[' css '] : ''
         return output
     }
+}
+
+let html = (strings, ...values) => {
+
+    //check for attributes that we're setting without values (flags like disabled, loop, required, etc)
+    let unfrozenStrings = strings.slice(0)
+    values.forEach((value, index) => {
+        if(typeof value === 'object' && value.type && value.type === 'attribute'){
+            //remove this item from the values array and put it in the strings array
+            let swap = values.splice(index, 1)
+            unfrozenStrings[index] += ` ${swap[0].value} `
+        }
+    })
+    return bel(unfrozenStrings, ...values)
 }
 
 function ssr(rootComponent){
@@ -262,5 +276,12 @@ export default function (config){
     })
 }
 
+function attribute(str){
+    return {
+        type: 'attribute',
+        value: str
+    }
+}
+
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
-export {state, getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
+export {attribute, state, getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}

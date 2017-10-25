@@ -20,7 +20,7 @@ Breaking changes. Halfcab is no longer built as a common js distribution. @std/e
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
+import halfcab, { html, css, attributes, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -56,6 +56,7 @@ Note the use of the utility function `emptyBody` to clear out the html body befo
 #### Components
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
+- `attributes` - use when you want to put place an attribute without a value like `disabled`, `required`, `muted`, etc.
 - `cache` - wrapper function to increase performance of reusable components by caching them. Use later on in your project when making performance tweaks.
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
@@ -82,7 +83,7 @@ export default args => html`
                 <img src="${args.company.logo.url}" />
             </div>
         
-            <div style="width: 216px; text-align: center;">
+            <div style="width: 216px; text-align: center;" ${attribute(args.disabled ? 'disabled' : '')}>
                         
                 <button onclick=${e => {
                 alert('I am a button')
