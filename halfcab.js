@@ -59,7 +59,8 @@ let html = (strings, ...values) => {
         if(typeof value === 'object' && value.type && value.type === 'attribute'){
             //remove this item from the values array and put it in the strings array
             let swap = values.splice(index, 1)
-            unfrozenStrings[index] += ` ${swap[0].value} `
+            let joiners = unfrozenStrings.splice(index, 2).join(` ${swap[0].value} `)
+            unfrozenStrings.splice(index, 0, joiners)
         }
     })
     return bel(unfrozenStrings, ...values)
