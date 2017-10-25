@@ -65,6 +65,18 @@ let html = (strings, ...values) => {
     return bel(unfrozenStrings, ...values)
 }
 
+function attribute(str){
+
+    if(!str){
+        return str
+    }
+
+    return {
+        type: 'attribute',
+        value: str
+    }
+}
+
 function ssr(rootComponent){
     let componentsString = `${rootComponent}`
     return { componentsString, stylesString: componentCSSString }
@@ -276,12 +288,6 @@ export default function (config){
     })
 }
 
-function attribute(str){
-    return {
-        type: 'attribute',
-        value: str
-    }
-}
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 export {attribute, state, getRouteComponent, cache, stateUpdated as rerender, formIsValid, ssr, injectHTML, injectMarkdown, geb, eventEmitter, cd, html, defineRoute, updateState, emptyBody, formField, gotoRoute, cssTag as css, axios as http}
