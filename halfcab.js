@@ -28,11 +28,18 @@ marked.setOptions({
     breaks: true
 })
 
+function b64DecodeUnicode(str) {
+    // Going backwards: from bytestream, to percent-encoding, to original string.
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
 if(typeof window !== 'undefined'){
     componentRegistry = new Map()
     dataInitial = document.querySelector('[data-initial]')
     if(!!dataInitial){
-        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(atob(dataInitial.dataset.initial)))
+        state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(b64DecodeUnicode(dataInitial.dataset.initial)))
 
         if(!state.router){
             state.router = {}
