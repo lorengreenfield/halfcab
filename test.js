@@ -98,6 +98,7 @@ describe('halfcab', () =>{
 
         it('Runs halfcab function without error', () =>{
             return halfcab({
+                el: '#root',
                 baseName: 'Resorts Interactive',
                 baseApiPath: '/api/webroutes',
                 components(){

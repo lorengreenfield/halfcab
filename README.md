@@ -38,12 +38,14 @@ This happens in the browser only:
 import halfcab, { emptyBody } from 'halfcab'
 
 halfcab({
+    el: '#root',//selector to mount root component on
     baseName: 'My company',//tab title base name
     components, //top level component module
     postUpdate() {
         //do something after each dom update
     }
 }).then( root => {
+    //if you've not used the `el` config property above, you can do your own mountain with the returned root component here
     emptyBody()
     document.body.appendChild(root)
     //run init function here
@@ -440,11 +442,9 @@ cd.mock = rootEl => {
 }
 
 halfcab({
+    el: '#root',
     baseName: 'Resorts Interactive',
     components
-}).then( root => {
-    emptyBody()
-    document.body.appendChild(root)
 }).catch(err => {
     console.log(err)
 })
