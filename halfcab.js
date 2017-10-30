@@ -1,7 +1,7 @@
-import sheetRouter from 'sheet-router'
-import href from 'sheet-router/href'
-import history from 'sheet-router/history'
-import createLocation from 'sheet-router/create-location'
+import shiftyRouter from 'shifty-router'
+import href from 'shifty-router/href'
+import history from 'shifty-router/history'
+import createLocation from 'shifty-router/create-location'
 import bel from 'bel'
 import update from 'nanomorph'
 import axios, { get } from 'axios'
@@ -233,6 +233,10 @@ function cache(c, args){
 
 function gotoRoute(route){
     let { pathname, hash, search, href } = createLocation({}, route)
+    //if pathname doesn't begin with a /, add one
+    if(pathname && pathname.indexOf('/') !== 0){
+        pathname = `/${pathname}`
+    }
     let component = router(route, { pathname, hash, search, href })
     updateState({
         router: {
@@ -282,7 +286,7 @@ export default function (config){
 
         ])
 
-        router = sheetRouter({default: '/404'}, routesFormatted)
+        router = shiftyRouter({default: '/404'}, routesFormatted)
 
         href(location =>{
             gotoRoute(location.href)
