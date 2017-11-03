@@ -67,7 +67,7 @@ let html = (strings, ...values) => {
 
   //fix pelo 0.0.4+ intercepting csjs object
   values = values.map(value => {
-    if (value.hasOwnProperty('toString')) {
+    if (value && value.hasOwnProperty('toString')) {
       return value.toString()
     }
     return value
