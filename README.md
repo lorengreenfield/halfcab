@@ -313,8 +313,7 @@ halfcab tries not to force you to use a single solution for both server side and
 Create a new route:
 ```js
 import { defineRoute } from 'halfcab'
-import myPageComponent from './myPageComponent'
-defineRoute({path: '/reportpal', title: 'Report Pal', component: myPageComponent, callback(routeInfo){
+defineRoute({path: '/reportpal', title: 'Report Pal', component: 'myPageComponent', callback(routeInfo){
     //this callback with route info is useful for making supplementary api calls
     console.log(routeInfo)//routInfo contains params, hash, query, href, pathname
 }})
@@ -322,6 +321,36 @@ defineRoute({path: '/reportpal', title: 'Report Pal', component: myPageComponent
 
 The `path` option sets the route path. Remember to include a forward slash as the first character of the route or if jumping to another site, http(s)://.
 The title sets the HTML title of the page and tab when the route is hit.
+
+The `component` option allows you to set a value for automatically swapping out components. Whenever this route is activated, if it has a component value, that value will be changed in state.router.component.
+You *could* set this as the component itself, but to make server side rendering easy and able to provide a component without needing a client side render, you should provide a string which you can then use to load in a component, for example:
+
+```
+defineRoute({path: '/reportpal', 
+title: 'Report Pal', 
+component: 'myPageComponent', 
+callback(routeInfo){
+    //this callback with route info is useful for making supplementary api calls
+    console.log(routeInfo)//routInfo contains params, hash, query, href, pathname
+}})
+
+// ...and in the component where you want the route change to automatically switch things:
+
+import { html, state } from 'halfcab'
+import myPageComponent from './myPageComponent'
+let routeComponents = {
+    myPageComponent
+}
+
+export default args => html`
+    <div id="root">${routeComponents[state.router.component](args)}</div>
+`
+
+// ...then later on
+
+getRoute('/reportpal') // This will swap out the route components
+
+```
 
 Once your routes are set up using the `route` function, there's two ways to tell your app to go to that route.
 1. a-href - Just use `a` tags as you normally would with the `href` property and the router will pick that up and route the app. The bonus of this approach is that using href is an easy way to help crawlers find their way through your site, and if structured carefully, you can also have basic navigation without the need for running JavaScript in the browser.
