@@ -257,14 +257,14 @@ eg.
 ```js
 import {html, formField, formIsValid} from 'halfcab'
 
-let holidingPen = {
+let holdingPen = {
     value: '',
     valid: { 
         value: true//The starting value is considered valid
     }
 }
-//alternatively use holidingPen with a symbol valid object
-let holidingPen = {
+//alternatively use holdingPen with a symbol valid object
+let holdingPen = {
     value: '',
     [Symbol('valid')]: { 
         value: true//The starting value is considered valid
@@ -274,7 +274,7 @@ let holidingPen = {
 export default args => html`
     <main>
         <div>
-            <input type="text" oninput=${formField(holidingPen, 'value')}>
+            <input type="text" oninput=${formField(holdingPen, 'value')}>
             <label for="my-textfield">Hint text</label>
         </div>
     </main>
