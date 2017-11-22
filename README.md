@@ -14,6 +14,11 @@ Breaking changes. Halfcab is no longer built as a common js distribution. @std/e
 - Components contain JS, HTML and CSS altogether in one file
 - Both browser and server side component rendering
 - Easy state management
+- Form validation
+- Client side routing (use server side routing of your choice)
+- Markdown injection
+- Global event bus and localized event emitter
+- http requests (Axios)
 
 
 
