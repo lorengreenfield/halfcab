@@ -76,7 +76,7 @@ let html = (strings, ...values) => {
   //check for attributes that we're setting without values (flags like disabled, loop, required, etc)
   let unfrozenStrings = strings.slice(0)
   values.forEach((value, index) => {
-    if (typeof value === 'object' && value.type && value.type === 'attribute') {
+    if (value && typeof value === 'object' && value.type && value.type === 'attribute') {
       //remove this item from the values array and put it in the strings array
       let swap = values.splice(index, 1)
       let joiners = unfrozenStrings.splice(index, 2).join(` ${swap[0].value} `)
