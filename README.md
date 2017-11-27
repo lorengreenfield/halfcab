@@ -25,7 +25,7 @@ Breaking changes. Halfcab is no longer built as a common js distribution. @std/e
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, attribute, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, ssr, defineRoute, gotoRoute, http } from 'halfcab'
+import halfcab, { html, css, attribute, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, fieldIsTouched, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -255,7 +255,7 @@ geb.broadcast('fieldUpdate', 23)
 eg.
 
 ```js
-import {html, formField, formIsValid} from 'halfcab'
+import {html, formField, formIsValid, fieldIsTouched} from 'halfcab'
 
 let holdingPen = {
     value: '',
@@ -270,6 +270,24 @@ let holdingPen = {
         value: true//The starting value is considered valid
     }
 }
+
+//you can also use a Symbol to set a boolean against fields that have been interacted with already (touched)
+let holdingPen = {
+    value: '',
+    [Symbol('valid')]: { 
+        value: true
+    },
+    [Symbol('touched')]: { //When formField is run against a property, its touched value is set to tru
+        value: true
+    }
+}
+```
+
+Use the touched value to attach a .touched class to your inputs so that you can only style them as invalid once the user has had a chance to interact with them
+eg.
+```js
+ let input = html`<input class="${styles.checkbox} ${fieldIsTouched(holdingPen, property) === true ? styles.touched : ''}" type="checkbox" />`
+```
 
 export default args => html`
     <main>

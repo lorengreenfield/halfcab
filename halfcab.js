@@ -118,6 +118,7 @@ function formField (ob, prop) {
   return e => {
     ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value
     let validOb
+    let touchedOb
     if (!ob.valid) {
       if (Object.getOwnPropertySymbols(ob).length > 0) {
         Object.getOwnPropertySymbols(ob).forEach(symb => {
@@ -133,6 +134,20 @@ function formField (ob, prop) {
     } else {
       validOb = 'valid'
     }
+
+    Object.getOwnPropertySymbols(ob).forEach(symb => {
+      if (symb.toString() === 'Symbol(touched)') {
+        touchedOb = symb
+      }
+    })
+
+    if(touchedOb){
+      if(!ob[touchedOb][prop]){
+        ob[touchedOb][prop] = true
+        stateUpdated()
+      }
+    }
+
     ob[validOb][prop] = e.currentTarget.validity.valid
     console.log('---formField update---')
     console.log(prop, ob)
@@ -163,6 +178,21 @@ function formIsValid (holidingPen) {
   }
 
   return true
+}
+
+function fieldIsTouched (holidingPen, property) {
+  let touchedProp
+  Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
+    if (symb.toString() === 'Symbol(touched)') {
+      touchedProp = symb
+    }
+  })
+
+  if (!touchedProp) {
+    return false
+  }
+
+  return !!holidingPen[touchedProp][property]
 }
 
 let waitingAlready = false
@@ -353,5 +383,6 @@ export {
   formField,
   gotoRoute,
   cssTag as css,
-  axios as http
+  axios as http,
+  fieldIsTouched
 }
