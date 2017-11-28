@@ -64,8 +64,7 @@ if (typeof window !== 'undefined') {
 }
 
 let html = (strings, ...values) => {
-
-  //fix pelo 0.0.4+ intercepting csjs object
+  // fix pelo 0.0.4+ intercepting csjs object
   values = values.map(value => {
     if (value && value.hasOwnProperty('toString')) {
       return value.toString()
@@ -73,29 +72,7 @@ let html = (strings, ...values) => {
     return value
   })
 
-  //check for attributes that we're setting without values (flags like disabled, loop, required, etc)
-  let unfrozenStrings = strings.slice(0)
-  values.forEach((value, index) => {
-    if (value && typeof value === 'object' && value.type && value.type === 'attribute') {
-      //remove this item from the values array and put it in the strings array
-      let swap = values.splice(index, 1)
-      let joiners = unfrozenStrings.splice(index, 2).join(` ${swap[0].value} `)
-      unfrozenStrings.splice(index, 0, joiners)
-    }
-  })
-  return bel(unfrozenStrings, ...values)
-}
-
-function attribute (str) {
-
-  if (!str) {
-    return str
-  }
-
-  return {
-    type: 'attribute',
-    value: str
-  }
+  return bel(strings, ...values)
 }
 
 function ssr (rootComponent) {
@@ -141,8 +118,8 @@ function formField (ob, prop) {
       }
     })
 
-    if(touchedOb){
-      if(!ob[touchedOb][prop]){
+    if (touchedOb) {
+      if (!ob[touchedOb][prop]) {
         ob[touchedOb][prop] = true
         stateUpdated()
       }
@@ -364,7 +341,6 @@ export default function (config) {
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 export {
-  attribute,
   state,
   getRouteComponent,
   cache,
