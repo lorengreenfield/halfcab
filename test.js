@@ -14,7 +14,7 @@ import decache from 'decache'
 let jsdom = jsdomGlobal()
 let halfcab
 let halfcabModule
-let {ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css, state, getRouteComponent, attribute} = {}
+let {ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody, css, state, getRouteComponent} = {}
 
 function serverMode(){
     jsdom && jsdom()
@@ -47,8 +47,7 @@ function browserMode(dataInitial){
         emptyBody,
         css,
         state,
-        getRouteComponent,
-        attribute
+        getRouteComponent
     } = halfcabModule)
     halfcab = halfcabModule.default
 }
@@ -400,20 +399,6 @@ describe('halfcab', () =>{
         it('has initial data injects router when its not there to start with', () =>{
             defineRoute({path: '/routeWithComponent', component: {fakeComponent: true}})
             expect(getRouteComponent('/routeWithComponent').fakeComponent).to.be.true()
-        })
-
-        describe('attribute', () =>{
-            it('returns an object with type and value', () =>{
-
-                expect(attribute('disabled').value).to.exist()
-                expect(attribute('disabled').type).to.equal('attribute')
-            })
-
-            it('returns itself if empty', () =>{
-
-                expect(attribute('')).to.equal('')
-                expect(attribute()).to.equal(undefined)
-            })
         })
 
     })
