@@ -136,7 +136,7 @@ function formIsValid (holidingPen) {
   let validProp = holidingPen.valid && 'valid'
   if (!validProp) {
     Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
-      if (symb.toString() === 'Symbol(valid)') {
+      if (symb.toString().indexOf('Symbol(valid)') === 0) {
         validProp = symb
       }
     })
@@ -160,7 +160,7 @@ function formIsValid (holidingPen) {
 function fieldIsTouched (holidingPen, property) {
   let touchedProp
   Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
-    if (symb.toString() === 'Symbol(touched)') {
+    if (symb.toString().indexOf('Symbol(touched)') === 0) {
       touchedProp = symb
     }
   })
