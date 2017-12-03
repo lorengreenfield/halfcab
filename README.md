@@ -288,12 +288,6 @@ eg.
  let input = html`<input class="${styles.checkbox} ${fieldIsTouched(holdingPen, property) === true ? styles.touched : ''}" type="checkbox" />`
 ```
 
-Once you've submitted your form, you might want to set all touched fields to false again if you're emptying out anything like a password field. Use `resetTouched` to do so:
-
-```js
-resetTouched(holdingPen)
-```
-
 export default args => html`
     <main>
         <div>
@@ -308,6 +302,14 @@ export default args => html`
 if(!formIsValid(holdingPen)){
     alert('Form not valid')
 }
+```
+
+#### Reset fields being touched
+
+Once you've submitted your form, you might want to set all touched fields to false again if you're emptying out anything like a password field. Use `resetTouched` to do so:
+
+```js
+resetTouched(holdingPen)
 ```
 
 #### Server side rendering
