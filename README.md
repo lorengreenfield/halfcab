@@ -25,7 +25,7 @@ Breaking changes. Halfcab is no longer built as a common js distribution. @std/e
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, fieldIsTouched, ssr, defineRoute, gotoRoute, http } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -286,6 +286,12 @@ Use the touched value to attach a .touched class to your inputs so that you can 
 eg.
 ```js
  let input = html`<input class="${styles.checkbox} ${fieldIsTouched(holdingPen, property) === true ? styles.touched : ''}" type="checkbox" />`
+```
+
+Once you've submitted your form, you might want to set all touched fields to false again if you're emptying out anything like a password field. Use `resetTouched` to do so:
+
+```js
+resetTouched(holdingPen)
 ```
 
 export default args => html`
