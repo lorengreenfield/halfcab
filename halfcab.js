@@ -159,7 +159,6 @@ function formIsValid (holidingPen) {
 
 function fieldIsTouched (holidingPen, property) {
   let touchedProp
-  debugger;
   Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
     if (symb.toString().indexOf('Symbol(touched)') === 0 && holidingPen[symb]) {
       touchedProp = symb
