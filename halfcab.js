@@ -173,6 +173,24 @@ function fieldIsTouched (holidingPen, property) {
   return !!holidingPen[touchedProp][property]
 }
 
+function resetTouched (holidingPen) {
+  let touchedProp
+  Object.getOwnPropertySymbols(holidingPen).forEach(symb => {
+    if (symb.toString() === 'Symbol(touched)') {
+      touchedProp = symb
+    }
+  })
+
+  if (!touchedProp) {
+    return
+  }
+
+  for (let prop in holidingPen[touchedProp]) {
+    holidingPen[touchedProp][prop] = false
+  }
+  stateUpdated()
+}
+
 let waitingAlready = false
 
 function debounce (func) {
@@ -361,5 +379,6 @@ export {
   gotoRoute,
   cssTag as css,
   axios as http,
-  fieldIsTouched
+  fieldIsTouched,
+  resetTouched
 }
