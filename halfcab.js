@@ -214,7 +214,7 @@ function updateState (updateObject, options) {
     if (options && options.deepMerge === false) {
       Object.assign(state, updateObject)
     } else {
-      let deepMergeOptions = {}
+      let deepMergeOptions = { clone: false }
       if (options && options.arrayMerge === false) {
         deepMergeOptions.arrayMerge = (destinationArray, sourceArray, options) => {
           //don't merge arrays, just return the new one
