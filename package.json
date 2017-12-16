@@ -1,11 +1,14 @@
 {
   "name": "halfcab",
-  "version": "7.1.4",
+  "version": "7.1.5",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.js",
   "module": "halfcab.js",
   "jsnext:main": "halfcab.js",
-  "@std/esm": true,
+  "@std/esm": {
+    "cjs": true,
+    "esm": "js"
+  },
   "scripts": {
     "test": "mocha --require reify test.js **/test.js",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
