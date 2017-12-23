@@ -1,16 +1,18 @@
-import shiftyRouter from 'shifty-router'
-import href from 'shifty-router/href'
-import history from 'shifty-router/history'
+import shiftyRouterModule from 'shifty-router'
+import hrefModule from 'shifty-router/href'
+import historyModule from 'shifty-router/history'
 import createLocation from 'shifty-router/create-location'
 import bel from 'bel'
 import update from 'nanomorph'
-import axios, { get } from 'axios'
+import axios from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
 import marked from 'marked'
-import { AllHtmlEntities } from 'html-entities'
-import geb, { eventEmitter } from './eventEmitter/index.js'
+import htmlEntities from 'html-entities'
+import geb, { eventEmitter } from './eventEmitter'
 import qs from 'qs'
+
+const {AllHtmlEntities} = htmlEntities
 
 let componentRegistry
 let entities = new AllHtmlEntities()
@@ -213,7 +215,7 @@ function updateState (updateObject, options) {
     if (options && options.deepMerge === false) {
       Object.assign(state, updateObject)
     } else {
-      let deepMergeOptions = { clone: false }
+      let deepMergeOptions = {clone: false}
       if (options && options.arrayMerge === false) {
         deepMergeOptions.arrayMerge = (destinationArray, sourceArray, options) => {
           //don't merge arrays, just return the new one
@@ -298,7 +300,7 @@ function getRouteComponent (pathname) {
   return foundRoute && foundRoute.component
 }
 
-export default function (config) {
+export default function (config, {shiftyRouter=shiftyRouterModule, href=hrefModule, history=historyModule} = {}) {
   //this default function is used for setting up client side and is not run on the server
   ({components, postUpdate, el} = config)
 
