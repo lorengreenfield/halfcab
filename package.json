@@ -7,7 +7,7 @@
   "jsnext:main": "halfcab.mjs",
   "@std/esm": true,
   "scripts": {
-    "test": "mocha --require reify test.js **/test.js",
+    "test": "mocha --require @std/esm test.mjs **/test.mjs",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
@@ -59,5 +59,10 @@
     "qs": "^6.5.1",
     "reify": "*",
     "shifty-router": "^0.1.1"
+  },
+  "nyc": {
+    "extension": [
+      ".mjs"
+    ]
   }
 }
