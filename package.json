@@ -64,6 +64,7 @@
     "extension": [
       ".mjs"
     ],
+    "reporter": "text-lcov",
     "require": [
       "@std/esm"
     ]
