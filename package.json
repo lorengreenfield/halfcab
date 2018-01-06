@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
   "module": "halfcab.mjs",
@@ -47,7 +47,7 @@
     "sinon-chai": "^2.14.0"
   },
   "dependencies": {
-    "@std/esm": "^0.18.0",
+    "@std/esm": "^0.19.1",
     "axios": "^0.17.0",
     "bel": "^5.1.5",
     "csjs-inject": "^1.0.1",
