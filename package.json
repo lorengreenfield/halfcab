@@ -7,8 +7,8 @@
   "jsnext:main": "halfcab.mjs",
   "@std/esm": "cjs",
   "scripts": {
-    "test": "mocha --require @std/esm test.mjs **/test.mjs",
-    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
+    "test": "_mocha --require @std/esm test.mjs **/test.mjs",
+    "coveralls": "nyc --extension '.mjs' --exclude '**/test.mjs' npm test && nyc report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
@@ -58,13 +58,5 @@
     "nanomorph": "^5.1.3",
     "qs": "^6.5.1",
     "shifty-router": "^0.1.1"
-  },
-  "nyc": {
-    "extension": [
-      ".mjs"
-    ],
-    "exclude": [
-      "**/test.mjs"
-    ]
   }
 }
