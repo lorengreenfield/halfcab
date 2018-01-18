@@ -39,7 +39,7 @@
     "dirty-chai": "^2.0.1",
     "jsdom": "^11.3.0",
     "jsdom-global": "^3.0.2",
-    "mocha": "^4.0.1",
+    "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^11.3.0",
     "pelo": "0.0.4",
