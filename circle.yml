@@ -1,6 +1,3 @@
 machine:
   node:
-    version: 8.1.4
-test:
-  post:
-    - npm run coveralls
+    version: 8.9.3
