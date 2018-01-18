@@ -65,6 +65,10 @@
     ],
     "exclude": [
       "**/test.mjs"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
     ]
   }
 }
