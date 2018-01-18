@@ -8,7 +8,7 @@
   "@std/esm": "cjs",
   "scripts": {
     "test": "_mocha --require @std/esm test.mjs **/test.mjs",
-    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
+    "coveralls": "nyc _mocha --require @std/esm test.mjs **/test.mjs && nyc report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
@@ -39,7 +39,7 @@
     "dirty-chai": "^2.0.1",
     "jsdom": "^11.5.1",
     "jsdom-global": "^3.0.2",
-    "mocha": "^4.1.0",
+    "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^11.4.1",
     "pelo": "0.0.4",
