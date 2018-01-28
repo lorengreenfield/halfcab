@@ -8,7 +8,7 @@
   "@std/esm": "cjs",
   "scripts": {
     "test": "_mocha --require @std/esm test.mjs **/test.mjs",
-    "coveralls": "nyc --extension '.mjs' --exclude '**/test.mjs' npm test && nyc report --reporter=text-lcov | coveralls",
+    "coveralls": "nyc npm test | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
