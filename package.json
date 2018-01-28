@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
   "module": "halfcab.mjs",
@@ -58,5 +58,19 @@
     "nanomorph": "^5.1.3",
     "qs": "^6.5.1",
     "shifty-router": "^0.1.1"
+  },
+  "nyc": {
+    "extension": [
+      ".mjs"
+    ],
+    "exclude": [
+      "**/test.mjs"
+    ],
+    "require": [
+      "@std/esm"
+    ],
+    "reporter": [
+      "text-lcov"
+    ]
   }
 }
