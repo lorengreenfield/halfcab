@@ -47,7 +47,7 @@
     "sinon-chai": "^2.14.0"
   },
   "dependencies": {
-    "@std/esm": "^0.19.6",
+    "@std/esm": "^0.20.0",
     "axios": "^0.17.1",
     "bel": "^5.1.5",
     "csjs-inject": "^1.0.1",
