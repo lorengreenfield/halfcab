@@ -321,7 +321,8 @@ export default function (config, {shiftyRouter=shiftyRouterModule, href=hrefModu
             hash: parts.hash,
             query: qs.parse(parts.search),
             params,
-            key: r.key || r.path
+            key: r.key || r.path,
+            href: location.href
           }
         }, {
           deepMerge: false
