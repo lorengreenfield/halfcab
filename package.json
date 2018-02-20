@@ -48,7 +48,7 @@
     "sinon-chai": "^2.14.0"
   },
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "bel": "^5.1.5",
     "csjs-inject": "^1.0.1",
     "deepmerge": "^2.0.1",
