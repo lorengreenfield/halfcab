@@ -241,11 +241,16 @@ function updateState (updateObject, options) {
 
 function emptySSRVideos (c) {
   //SSR videos with source tags don't like morphing and you get double audio, so remove src from the new one so it never starts
-  let videos = c.querySelectorAll('video')
-  Array.from(videos).forEach(video => {
+  let autoplayTrue = c.querySelectorAll('video[autoplay="true"]')
+  let autoplayAutoplay = c.querySelectorAll('video[autoplay="autoplay"]')
+  let autoplayOn = c.querySelectorAll('video[autoplay="on"]')
+  let selectors = [autoplayTrue, autoplayAutoplay, autoplayOn]
+  selectors.forEach(selector => {
+    Array.from(selector).forEach(video => {
 
-    Array.from(video.childNodes).forEach(source => {
-      source.src && (source.src = '')
+      Array.from(video.childNodes).forEach(source => {
+        source.src && (source.src = '')
+      })
     })
   })
 }
@@ -300,7 +305,7 @@ function getRouteComponent (pathname) {
   return foundRoute && foundRoute.component
 }
 
-export default function (config, {shiftyRouter=shiftyRouterModule, href=hrefModule, history=historyModule} = {}) {
+export default function (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, history = historyModule} = {}) {
   //this default function is used for setting up client side and is not run on the server
   ({components, postUpdate, el} = config)
 
