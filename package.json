@@ -45,7 +45,7 @@
     "nyc": "^11.4.1",
     "pelo": "0.0.4",
     "sinon": "^4.1.6",
-    "sinon-chai": "^2.14.0"
+    "sinon-chai": "^3.0.0"
   },
   "dependencies": {
     "axios": "^0.17.1",
