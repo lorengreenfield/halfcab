@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
-    "bel": "^5.1.5",
+    "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
     "deepmerge": "^2.0.1",
     "event-emitter": "^0.3.5",
