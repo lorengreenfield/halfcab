@@ -5,7 +5,7 @@ Halfcab is a universal JavaScript framework that assembles some elegant and easy
 [![CircleCI](https://circleci.com/gh/lorengreenfield/halfcab.svg?style=shield)](https://circleci.com/gh/lorengreenfield/halfcab) [![Coverage Status](https://coveralls.io/repos/github/lorengreenfield/halfcab/badge.svg?branch=master)](https://coveralls.io/github/lorengreenfield/halfcab?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/lorengreenfield/halfcab.svg)](https://greenkeeper.io/)
 
 ## ES Modules required
-Halfcab is no longer built as a common js distribution. @std/esm is required in node, and an es2015 bundler is required for the browser (webpack, rollup, etc)
+Halfcab is no longer built as a common js distribution. The `esm` package is required in node, and an es2015 bundler is required for the browser (webpack, rollup, etc)
 
 ## What you get
 
