@@ -347,6 +347,12 @@ defineRoute({path: '/reportpal', title: 'Report Pal', component: 'myPageComponen
     //this callback with route info is useful for making supplementary api calls
     console.log(routeInfo)//routInfo contains params, hash, query, href, pathname
 }})
+
+```
+To create a route that is on the same domain, but outside the realms of your client side routing management (microsites, etc), use the external boolean:
+```js
+import { defineRoute } from 'halfcab'
+defineRoute({path: '/reportpal', external: true})
 ```
 
 The `path` option sets the route path. Remember to include a forward slash as the first character of the route or if jumping to another site, http(s)://.

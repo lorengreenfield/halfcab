@@ -19,6 +19,7 @@ let entities = new AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
+let externalRoutes = []
 let state = {}
 let router
 let rootEl
@@ -83,6 +84,9 @@ function ssr (rootComponent) {
 }
 
 function defineRoute (routeObject) {
+  if(routeObject.external){
+    return externalRoutes.push(routeObject.path)
+  }
   routesArray.push(routeObject)
 }
 
@@ -344,6 +348,11 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
     router = shiftyRouter({default: '/404'}, routesFormatted)
 
     href(location => {
+      if(externalRoutes.includes(location.pathname)){
+         window.location = location.pathname
+        return
+      }
+
       gotoRoute(location.href)
     })
 
