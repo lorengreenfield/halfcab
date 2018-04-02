@@ -3,7 +3,7 @@ import dirtyChai from 'dirty-chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import jsdomGlobal from 'jsdom-global'
-import pelo from 'pelo'
+import server from 'nanohtml/lib/server'
 
 const {expect} = chai
 chai.use(dirtyChai)
@@ -11,7 +11,7 @@ chai.use(sinonChai)
 chai.use(dirtyChai)
 
 let serverHtml = (strings, ...values) => {
-  // this duplicates the halfcab html function but uses pelo instead of bel
+  // this duplicates the halfcab html function but uses pelo instead of nanohtml
   values = values.map(value => {
     if (value && value.hasOwnProperty('toString')) {
       return value.toString()
@@ -19,7 +19,7 @@ let serverHtml = (strings, ...values) => {
     return value
   })
 
-  return pelo(strings, ...values)
+  return server(strings, ...values)
 }
 
 let halfcab, ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody,
@@ -404,6 +404,28 @@ describe('halfcab', () => {
     it('has initial data injects router when its not there to start with', () => {
       defineRoute({path: '/routeWithComponent', component: {fakeComponent: true}})
       expect(getRouteComponent('/routeWithComponent').fakeComponent).to.be.true()
+    })
+
+    it(`Doesn't clone when merging`, () => {
+      let myObject = {
+        test: 1,
+        fake: 'String2'
+      }
+
+      updateState({
+        myObject
+      })
+
+      setTimeout(() => {
+        updateState({
+          myObject: {
+            test: 2
+          }
+        })
+
+        expect(myObject.test).to.equal(2)
+      })
+
     })
 
   })
