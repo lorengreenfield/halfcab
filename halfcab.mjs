@@ -349,7 +349,7 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
 
     href(location => {
       if(externalRoutes.includes(location.pathname)){
-         window.location = location.pathname@std/es
+         window.location = location.pathname
         return
       }
 
