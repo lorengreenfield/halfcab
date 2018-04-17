@@ -251,7 +251,7 @@ function emptySSRVideos (c) {
   let selectors = [autoplayTrue, autoplayAutoplay, autoplayOn]
   selectors.forEach(selector => {
     Array.from(selector).forEach(video => {
-
+      video.pause()
       Array.from(video.childNodes).forEach(source => {
         source.src && (source.src = '')
       })
