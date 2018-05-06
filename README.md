@@ -170,7 +170,7 @@ export default args => cache(singleField, args)
 ```
 This essentially acts as a component cache. Notice that instead of just returning your component as the default function, you're simply creating a separate constant that holds the function, and then passing that function, along with the args, into the cache wrapper function.
 
-You'll end up with slightly better performance than React (but not React Fibre) using the `component` wrapper. See the [halfcab Sierpinski Triangle example](https://resorts-interactive.com/uiperftest.html).
+You'll end up with slightly better performance than React (but not React Fibre) using the `cache` wrapper. See the [halfcab Sierpinski Triangle example](https://resorts-interactive.com/uiperftest.html).
 
 It's worth mentioning here a second time, **don't wrap your root component**. Everything else is fine.
 
