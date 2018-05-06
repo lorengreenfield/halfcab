@@ -11,6 +11,7 @@ import marked from 'marked'
 import htmlEntities from 'html-entities'
 import geb, { eventEmitter } from './eventEmitter'
 import qs from 'qs'
+import toSource from 'tosource'
 
 const {AllHtmlEntities} = htmlEntities
 
@@ -276,7 +277,7 @@ function cache (c, args) {
     return c(args)
   }
 
-  let key = c.toString() + JSON.stringify(args)
+  let key = c.toString() + toSource(args)
 
   if (!componentRegistry.has(key)) {
 
