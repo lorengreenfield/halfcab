@@ -2,7 +2,7 @@ import chai from 'chai'
 import dirtyChai from 'dirty-chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import { eventEmitter } from './index'
+import eventEmitter from './index'
 import jsdomGlobal from 'jsdom-global'
 
 const {expect} = chai

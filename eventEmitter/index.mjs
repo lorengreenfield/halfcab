@@ -1,6 +1,6 @@
 import eeModule from 'event-emitter'
 
-function eventEmitter ({ee = eeModule} = {}) {
+export default function ({ee = eeModule, state = {}} = {}) {
 
   var events = ee({})
   var noop = () => {}
@@ -10,11 +10,10 @@ function eventEmitter ({ee = eeModule} = {}) {
 
       //Set a break point on the following line to monitor all events being broadcast
       console.log('Event broadcast: ' + eventName)
-      events.emit(eventName, eventObject)
+      events.emit(eventName, eventObject, state)
     }
 
     function on (eventName, cb) {
-
       //Set a break point on the following line to monitor all events being listened to
       events.on(eventName, cb)
     }
@@ -32,10 +31,10 @@ function eventEmitter ({ee = eeModule} = {}) {
     }
 
     return {
-      broadcast: broadcast,
-      on: on,
-      once: once,
-      off: off
+      broadcast,
+      on,
+      once,
+      off
     }
   } else {
     return {
@@ -47,6 +46,3 @@ function eventEmitter ({ee = eeModule} = {}) {
   }
 
 }
-
-export default new eventEmitter()
-export { eventEmitter }
