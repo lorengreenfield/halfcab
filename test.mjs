@@ -54,7 +54,6 @@ describe('halfcab', () => {
         formIsValid,
         emptyBody,
         css,
-        state,
         getRouteComponent
       } = halfcabModule)
       halfcab = halfcabModule.default
@@ -90,14 +89,9 @@ describe('halfcab', () => {
         formIsValid,
         emptyBody,
         css,
-        state,
         getRouteComponent
       } = halfcabModule)
       halfcab = halfcabModule.default
-    })
-
-    it('has initial data with router property to be available', async () => {
-      expect(state.router).to.exist()
     })
 
     it('Produces an HTML element when rendering', () => {
@@ -118,7 +112,6 @@ describe('halfcab', () => {
       return halfcab({
         el: '#root',
         baseName: 'Resorts Interactive',
-        baseApiPath: '/api/webroutes',
         components () {
           return html `<div></div>`
         }
@@ -131,29 +124,36 @@ describe('halfcab', () => {
     it('updating state causes a rerender with state', () => {
       return halfcab({
         baseName: 'Resorts Interactive',
-        baseApiPath: '/api/webroutes',
         components (args) {
           return html`<div>${args.testing || ''}</div>`
         }
       })
-        .then(rootEl => {
+        .then(({rootEl, state}) => {
           updateState({testing: 'works'})
           expect(rootEl.innerHTML.includes('works')).to.be.true()
         })
     })
 
     it('updates state without merging arrays when told to', () => {
-      updateState({
-        myArray: ['1', '2', '3']
+      return halfcab({
+        baseName: 'Resorts Interactive',
+        components () {
+          return html `<div></div>`
+        }
       })
+        .then(({rootEl, state}) => {
+          updateState({
+            myArray: ['1', '2', '3']
+          })
 
-      updateState({
-        myArray: ['4']
-      }, {
-        arrayMerge: false
-      })
+          updateState({
+            myArray: ['4']
+          }, {
+            arrayMerge: false
+          })
+          expect(state.myArray.length).to.equal(1)
+        })
 
-      expect(state.myArray.length).to.equal(1)
     })
 
     it('updating state without deepmerge overwrites objects', () => {
@@ -164,12 +164,11 @@ describe('halfcab', () => {
             `
       return halfcab({
         baseName: 'Resorts Interactive',
-        baseApiPath: '/api/webroutes',
         components (args) {
           return html `<div class="${style.myStyle}">${args.testing.inner || ''}</div>`
         }
       })
-        .then(rootEl => {
+        .then(({rootEl, state}) => {
           updateState({testing: {inner: 'works'}})
           updateState({testing: {inner2: 'works'}}, {
             deepMerge: false
@@ -181,12 +180,11 @@ describe('halfcab', () => {
     it('injects external content without error', () => {
       return halfcab({
         baseName: 'Resorts Interactive',
-        baseApiPath: '/api/webroutes',
         components (args) {
           return html `<div>${injectMarkdown('### Heading')}</div>`
         }
       })
-        .then(rootEl => {
+        .then(({rootEl, state}) => {
           emptyBody()
           expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
           expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
@@ -196,12 +194,11 @@ describe('halfcab', () => {
     it('injects markdown without wrapper without error', () => {
       return halfcab({
         baseName: 'Resorts Interactive',
-        baseApiPath: '/api/webroutes',
         components (args) {
           return html `<div>${injectMarkdown('### Heading', {wrapper: false})}</div>`
         }
       })
-        .then(rootEl => {
+        .then(({rootEl, state}) => {
           emptyBody()
           expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
           expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)

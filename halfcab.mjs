@@ -9,7 +9,7 @@ import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
 import marked from 'marked'
 import htmlEntities from 'html-entities'
-import geb, { eventEmitter } from './eventEmitter'
+import eventEmitter from './eventEmitter'
 import qs from 'qs'
 import toSource from 'tosource'
 
@@ -66,6 +66,8 @@ if (typeof window !== 'undefined') {
     return output
   }
 }
+
+let geb = new eventEmitter({state})
 
 let html = (strings, ...values) => {
   // fix pelo 0.0.4+ intercepting csjs object
@@ -350,7 +352,7 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
 
     href(location => {
       if(externalRoutes.includes(location.pathname)){
-         window.location = location.pathname
+        window.location = location.pathname
         return
       }
 
@@ -368,16 +370,15 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
 
       let r = document.querySelector(el)
       rootEl = update(r, c)
-      return resolve(rootEl)
+      return resolve({rootEl, state})
     }
     rootEl = c
-    resolve(rootEl)//if no root element provided, just return the root component
+    resolve({rootEl, state})//if no root element provided, just return the root component and the state
   })
 }
 
 let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 export {
-  state,
   getRouteComponent,
   cache,
   stateUpdated as rerender,
