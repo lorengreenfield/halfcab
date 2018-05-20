@@ -25,7 +25,7 @@ Halfcab is no longer built as a common js distribution. The `esm` package is req
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, state, cd, emptyBody, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, cd, emptyBody, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http } from 'halfcab'
 ```
 
 ## Installation
@@ -49,10 +49,11 @@ halfcab({
     postUpdate() {
         //do something after each dom update
     }
-}).then( root => {
+}).then(({rootEl, state}) => {
+    // note that the global state is made available here
     //if you've not used the `el` config property above, you can do your own mountain with the returned root component here
-    emptyBody()
-    document.body.appendChild(root)
+    emptyBody() // not needed if el property set above
+    document.body.appendChild(rootEl) // not needed if el property set above
     //run init function here
 }).catch(err => {
     console.log(err)
@@ -186,7 +187,8 @@ Most often you'll use broadcast and on.
 Listen for an event:
 ```js
 import { geb } from 'halfcab'
-geb.on('doStuff', args => {
+geb.on('doStuff', (passedInArgs, state) => {
+    // note that the global state is passed in as the second argument to all geb listeners
     alert('Stuff happened')
 })
 ```
@@ -199,7 +201,7 @@ geb.broadcast('doStuff', argsObject)
 
 The off method will turn off listening to events, and you'll need a named function to reference, eg:
 ```js
-var myFunc = args => {
+var myFunc = (passedInArgs, state) => {
     alert('Stuff happened from myFunc')
 }
 geb.on('doStuff', myFunc)
@@ -221,14 +223,13 @@ var localEvents = new eventEmitter()
 Then just use `localEvents` as you would `geb`
 
 #### State management
-- `state` - an object that contains the application state (Read only version of the global state. Use updateState to make state changes)
 - `updateState` - update the global state object. You can choose to do shallow or deep merging. If you want to you can achieve Redux style updates by using `geb`. Calling updateState will cause the state object to be updated and then re-rendered.
 - `rerender` - The global state is passed into the root component and is mutable, if you want to make deep changes within a component by mutating the state directly without using updateState, you can do so, followed by `rerender()`. By comparison, updateState merges/mutates the state and then runs rerender for you.
 
 ```js
 import { updateState, geb } from 'halfcab'
 
-geb.on('fieldUpdate', newValue => {
+geb.on('fieldUpdate', (newValue, state) => {
     updateState({
         field: {
             value: newValue
@@ -372,14 +373,14 @@ callback(routeInfo){
 
 // ...and in the component where you want the route change to automatically switch things:
 
-import { html, state } from 'halfcab'
+import { html } from 'halfcab'
 import myPageComponent from './myPageComponent'
 let routeComponents = {
     myPageComponent
 }
 
-export default args => html`
-    <div id="root">${routeComponents[state.router.component](args)}</div>
+export default state => html`
+    <div id="root">${routeComponents[state.router.component](state)}</div>
 `
 
 // ...then later on
