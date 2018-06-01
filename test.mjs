@@ -22,7 +22,7 @@ let serverHtml = (strings, ...values) => {
   return server(strings, ...values)
 }
 
-let halfcab, ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid, emptyBody,
+let halfcab, ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid,
   css, state, getRouteComponent
 
 function intialData (dataInitial) {
@@ -52,7 +52,6 @@ describe('halfcab', () => {
         updateState,
         injectMarkdown,
         formIsValid,
-        emptyBody,
         css,
         getRouteComponent
       } = halfcabModule)
@@ -65,7 +64,8 @@ describe('halfcab', () => {
         }
       `
       let {componentsString, stylesString} = ssr(serverHtml`
-        <div class="${style.myStyle}" oninput=${() => {}}></div>
+        <div class="${style.myStyle}" oninput=${() => {
+      }}></div>
       `)
       expect(typeof componentsString === 'string').to.be.true()
     })
@@ -87,7 +87,6 @@ describe('halfcab', () => {
         updateState,
         injectMarkdown,
         formIsValid,
-        emptyBody,
         css,
         getRouteComponent
       } = halfcabModule)
@@ -96,14 +95,16 @@ describe('halfcab', () => {
 
     it('Produces an HTML element when rendering', () => {
       let el = html`
-         <div oninput=${() => {}}></div>
+         <div oninput=${() => {
+      }}></div>
       `
       expect(el instanceof HTMLDivElement).to.be.true()
     })
 
     it('Produces an HTML element wrapping as a reusable component', () => {
       let el = cache(() => html`
-          <div oninput=${() => {}}></div>
+          <div oninput=${() => {
+      }}></div>
       `, {})
       expect(el instanceof HTMLDivElement).to.be.true()
     })
@@ -111,7 +112,6 @@ describe('halfcab', () => {
     it('Runs halfcab function without error', () => {
       return halfcab({
         el: '#root',
-        baseName: 'Resorts Interactive',
         components () {
           return html `<div></div>`
         }
@@ -123,7 +123,6 @@ describe('halfcab', () => {
 
     it('updating state causes a rerender with state', () => {
       return halfcab({
-        baseName: 'Resorts Interactive',
         components (args) {
           return html`<div>${args.testing || ''}</div>`
         }
@@ -136,7 +135,6 @@ describe('halfcab', () => {
 
     it('updates state without merging arrays when told to', () => {
       return halfcab({
-        baseName: 'Resorts Interactive',
         components () {
           return html `<div></div>`
         }
@@ -163,7 +161,6 @@ describe('halfcab', () => {
                 }
             `
       return halfcab({
-        baseName: 'Resorts Interactive',
         components (args) {
           return html `<div class="${style.myStyle}">${args.testing.inner || ''}</div>`
         }
@@ -179,13 +176,11 @@ describe('halfcab', () => {
 
     it('injects external content without error', () => {
       return halfcab({
-        baseName: 'Resorts Interactive',
         components (args) {
           return html `<div>${injectMarkdown('### Heading')}</div>`
         }
       })
         .then(({rootEl, state}) => {
-          emptyBody()
           expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
           expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
         })
@@ -193,13 +188,11 @@ describe('halfcab', () => {
 
     it('injects markdown without wrapper without error', () => {
       return halfcab({
-        baseName: 'Resorts Interactive',
         components (args) {
           return html `<div>${injectMarkdown('### Heading', {wrapper: false})}</div>`
         }
       })
         .then(({rootEl, state}) => {
-          emptyBody()
           expect(rootEl.innerHTML.indexOf('###')).to.equal(-1)
           expect(rootEl.innerHTML.indexOf('<h3')).not.to.equal(-1)
         })
@@ -346,7 +339,6 @@ describe('halfcab', () => {
         })
 
         return halfcab({
-          baseName: 'Resorts Interactive',
           components () {
             return html `<div></div>`
           }
@@ -356,7 +348,8 @@ describe('halfcab', () => {
             let routing = () => {
               gotoRoute('/testFakeRoute')
             }
-            expect(routing).to.not.throw()//made it out of the try catch, must be fine
+            expect(routing).to.not.throw()//made it out of the try catch, must
+                                          // be fine
           })
 
       })
@@ -364,43 +357,27 @@ describe('halfcab', () => {
       it(`Throws an error when a route doesn't exist`, () => {
 
         return halfcab({
-          baseName: 'Resorts Interactive',
           components () {
             return html `<div></div>`
           }
         })
           .then(rootEl => {
-
             let routing = () => {
               gotoRoute('/thisIsAFakeRoute')
             }
-            expect(routing).to.throw()//made it out of the try catch, must be fine
+            expect(routing).to.throw()//made it out of the try catch, must be
+                                      // fine
           })
 
-      })
-
-      it(`postUpdate is called after an update`, async () => {
-
-        let postUpdate = sinon.spy()
-        let hc = halfcab({
-          baseName: 'Resorts Interactive',
-          components () {
-            return html `<div></div>`
-          },
-          postUpdate
-        })
-
-        updateState({
-          nothing: 'something'
-        })
-
-        expect(postUpdate).to.have.been.calledOnce()
       })
     })
 
     it('has initial data injects router when its not there to start with', () => {
       defineRoute({path: '/routeWithComponent', component: {fakeComponent: true}})
-      expect(getRouteComponent('/routeWithComponent').fakeComponent).to.be.true()
+      expect(getRouteComponent('/routeWithComponent').fakeComponent)
+        .to
+        .be
+        .true()
     })
 
     it(`Doesn't clone when merging`, () => {
