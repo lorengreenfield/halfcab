@@ -25,7 +25,7 @@ Halfcab is no longer built as a common js distribution. The `esm` package is req
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent } from 'halfcab'
+import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick } from 'halfcab'
 ```
 
 ## Installation
@@ -45,7 +45,7 @@ import halfcab from 'halfcab'
 halfcab({
   el: '#root', // selector to mount root component on
   components,  // top level component module
-}).then((rootEl, state) => {
+}).then(({rootEl, state}) => {
   // rootEl and global state made available here if needed
 }).catch(err => {
   console.log(err)
@@ -141,11 +141,11 @@ If you want a bit of a performance boost with components that you know will be r
 import {html, formField, cache} from 'halfcab'
 
 const singleField = ({holdingPen, name, property, styles, type, required, pattern}) => html`
-    <div>
-      <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="${styles.input}" ${required ? `required` : ''} />
-      <label>${name}</label>
-      <div></div>
-    </div>
+  <div>
+    <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="${styles.input}" ${required ? `required` : ''} />
+    <label>${name}</label>
+    <div></div>
+  </div>
 `
 
 export default args => cache(singleField, args)
@@ -169,8 +169,8 @@ Listen for an event:
 ```js
 import { geb } from 'halfcab'
 geb.on('doStuff', (passedInArgs, state) => {
-    // note that the global state is passed in as the second argument to all geb listeners
-    alert('Stuff happened')
+  // note that the global state is passed in as the second argument to all geb listeners
+  alert('Stuff happened')
 })
 ```
 
@@ -183,7 +183,7 @@ geb.broadcast('doStuff', argsObject)
 The off method will turn off listening to events, and you'll need a named function to reference, eg:
 ```js
 var myFunc = (passedInArgs, state) => {
-    alert('Stuff happened from myFunc')
+  alert('Stuff happened from myFunc')
 }
 geb.on('doStuff', myFunc)
 
@@ -230,6 +230,7 @@ geb.broadcast('fieldUpdate', 23)
 #### Utilities
 - `formField` - an easy way to create a holding pen object for form changes before sending it to the global state - good for when using oninput instead of onchanged or if you only want to update the global state once the data is validated.
 - `formIsValid` - test if a holdingPen object's values are all valid. Halfcab will automatically populate a `valid` object within the holding pen that contains the same keys - this can either be object.valid or object[Symbol('valid')]. The validity of these is best set when you define the holding pen's initial values. Likewise, there's a `touched` object with the same keys that keeps track of which form elements have received focus at least once - helpful for form validation feedback.
+- `nextTick` - Run a function at the next batched update. Usage: `nextTick(myFunction)`
 
 eg.
 
@@ -290,6 +291,64 @@ Once you've submitted your form, you might want to set all touched fields to fal
 ```js
 resetTouched(holdingPen)
 ```
+
+If you're dynamically wanting to change your form, you'll want to also alter the corresponding holdingPen so that you can correctly validate it 
+
+You can add and remove properties to the holdingPen and retain correct validation by using the `addToHoldingPen` and `removeFromHoldingPen` functions.
+
+eg:
+
+```js
+let holdingPen = {
+  email: '',
+  password: '',
+  [Symbol('valid')]: {
+    email: false,
+    password: false
+  },
+  [Symbol('touched')]: {
+    email: false,
+    password: false
+  }
+}
+
+addToHoldingPen(holdingPen, {
+  test1: '',
+  test2: '',
+  [Symbol('valid')]: {
+    test1: false,
+    test2: false
+  },
+  [Symbol('touched')]: {
+    test1: false,
+    test2: false
+  }
+})
+
+removeFromHoldingPen(holdingPen, [
+  'test1',
+  'password'
+])
+
+```
+
+The above will leave you with a holding pen that has this structure:
+```js
+holdingPen = {
+  email: '',
+  test2: '',
+  [Symbol('valid')]: {
+    email: false,
+    test2: false
+  },
+  [Symbol('touched')]: {
+    email: false,
+    test2: false
+  }
+}
+```
+
+test1 and test2 properties were added using an object with initial values, and then test1 and property were removed, using an array, since you're removing, you don't have to provide key values, just the keys.
 
 #### Server side rendering
 - `ssr` - wrap root component with the ssr function on the server to return an object with componentsString and stylesString properties to inject into your HTML base template *See the full example at the bottom of this document for usage*

@@ -69,7 +69,7 @@ if (typeof window !== 'undefined') {
 let geb = new eventEmitter({state})
 
 let html = (strings, ...values) => {
-  // fix pelo 0.0.4+ intercepting csjs object
+  // fix for allowing csjs to coexist with nanohtml SSR
   values = values.map(value => {
     if (value && value.hasOwnProperty('toString')) {
       return value.toString()
@@ -193,7 +193,7 @@ function resetTouched (holidingPen) {
 
 let waitingAlready = false
 
-function debounce (func) {
+function nextTick (func) {
   if (!waitingAlready) {
     waitingAlready = true
     requestAnimationFrame(() => {
@@ -208,7 +208,6 @@ function stateUpdated () {
 }
 
 function updateState (updateObject, options) {
-
   if (updateObject) {
     if (options && options.deepMerge === false) {
       Object.assign(state, updateObject)
@@ -224,7 +223,7 @@ function updateState (updateObject, options) {
     }
   }
 
-  debounce(stateUpdated)
+  nextTick(stateUpdated)
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('------STATE UPDATE------')
@@ -258,28 +257,14 @@ function injectHTML (htmlString, options) {
   if (options && options.wrapper === false) {
     return html([htmlString])
   }
-  return html([`<div>${htmlString}</div>`])//using html as a regular function
-                                           // instead of a tag function, and
-                                           // prevent double encoding of
-                                           // ampersands while we're at it
+  return html([`<div>${htmlString}</div>`]) // using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function injectMarkdown (mdString, options) {
-  return injectHTML(entities.decode(marked(mdString)), options)//using html as
-                                                               // a regular
-                                                               // function
-                                                               // instead of a
-                                                               // tag function,
-                                                               // and prevent
-                                                               // double
-                                                               // encoding of
-                                                               // ampersands
-                                                               // while we're
-                                                               // at it
+  return injectHTML(entities.decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function cache (c, args) {
-
   if (typeof window === 'undefined') {
     return c(args)
   }
@@ -317,13 +302,43 @@ function getRouteComponent (pathname) {
   return foundRoute && foundRoute.component
 }
 
+function getSymbol(ob, symbolName){
+  let symbols = Object.getOwnPropertySymbols(ob)
+  if (symbols.length) {
+    return symbols.find(symb => symb.toString().includes(`Symbol(${symbolName})`))
+  }
+}
+
+function addToHoldingPen(holdingPen, addition){
+  let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
+  let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
+  let additionValid = addition[getSymbol(addition, 'valid')]
+  let additionTouched = addition[getSymbol(addition, 'touched')]
+  let additionWithoutSymbols = {}
+  Object.keys(addition).forEach(ad => {
+    additionWithoutSymbols[ad] = addition[ad]
+  })
+  Object.assign(currentValid, additionValid)
+  Object.assign(currentTouched, additionTouched)
+  Object.assign(holdingPen, additionWithoutSymbols)
+}
+
+function removeFromHoldingPen(holdingPen, removal){
+  let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
+  let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
+  removal.forEach(key => {
+    delete currentValid[key]
+    delete currentTouched[key]
+    delete holdingPen[key]
+  })
+}
+
 export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, history = historyModule} = {}) => {
   //this default function is used for setting up client side and is not run on
   // the server
   ({components, el} = config)
 
   return new Promise((resolve, reject) => {
-
     let routesFormatted = routesArray.map(r => [
       r.path,
       (params, parts) => {
@@ -379,8 +394,8 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
       return resolve({rootEl, state})
     }
     rootEl = c
-    resolve(rootEl, state)//if no root element provided, just return the root
-                            // component and the state
+    resolve({rootEl, state})//if no root element provided, just return the root
+    // component and the state
   })
 }
 
@@ -402,5 +417,8 @@ export {
   cssTag as css,
   axios as http,
   fieldIsTouched,
-  resetTouched
+  resetTouched,
+  nextTick,
+  addToHoldingPen,
+  removeFromHoldingPen
 }
