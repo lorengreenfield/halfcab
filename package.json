@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
   "module": "halfcab.mjs",
@@ -42,7 +42,7 @@
     "jsdom": "^11.5.1",
     "jsdom-global": "^3.0.2",
     "mocha": "^5.0.0",
-    "nyc": "^11.4.1",
+    "nyc": "^12.0.1",
     "sinon": "^5.0.7",
     "sinon-chai": "^3.0.0"
   },
@@ -52,7 +52,7 @@
     "deepmerge": "^2.1.0",
     "event-emitter": "^0.3.5",
     "html-entities": "^1.2.1",
-    "marked": "^0.3.19",
+    "marked": "^0.4.0",
     "nanohtml": "^1.2.2",
     "nanomorph": "^5.1.3",
     "qs": "^6.5.1",
