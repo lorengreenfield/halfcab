@@ -25,7 +25,6 @@ let state = {}
 let router
 let rootEl
 let components
-let postUpdate
 let dataInitial
 let el
 
@@ -70,7 +69,7 @@ if (typeof window !== 'undefined') {
 let geb = new eventEmitter({state})
 
 let html = (strings, ...values) => {
-  // fix pelo 0.0.4+ intercepting csjs object
+  // fix for allowing csjs to coexist with nanohtml SSR
   values = values.map(value => {
     if (value && value.hasOwnProperty('toString')) {
       return value.toString()
@@ -87,20 +86,13 @@ function ssr (rootComponent) {
 }
 
 function defineRoute (routeObject) {
-  if(routeObject.external){
+  if (routeObject.external) {
     return externalRoutes.push(routeObject.path)
   }
   routesArray.push(routeObject)
 }
 
-function emptyBody () {
-  while (document.body.firstChild) {
-    document.body.removeChild(document.body.firstChild)
-  }
-}
-
 function formField (ob, prop) {
-
   return e => {
     ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value
     let validOb
@@ -201,7 +193,7 @@ function resetTouched (holidingPen) {
 
 let waitingAlready = false
 
-function debounce (func) {
+function nextTick (func) {
   if (!waitingAlready) {
     waitingAlready = true
     requestAnimationFrame(() => {
@@ -213,11 +205,9 @@ function debounce (func) {
 
 function stateUpdated () {
   rootEl && update(rootEl, components(state))
-  postUpdate && postUpdate()
 }
 
 function updateState (updateObject, options) {
-
   if (updateObject) {
     if (options && options.deepMerge === false) {
       Object.assign(state, updateObject)
@@ -233,7 +223,7 @@ function updateState (updateObject, options) {
     }
   }
 
-  debounce(stateUpdated)
+  nextTick(stateUpdated)
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('------STATE UPDATE------')
@@ -247,7 +237,8 @@ function updateState (updateObject, options) {
 }
 
 function emptySSRVideos (c) {
-  //SSR videos with source tags don't like morphing and you get double audio, so remove src from the new one so it never starts
+  //SSR videos with source tags don't like morphing and you get double audio,
+  // so remove src from the new one so it never starts
   let autoplayTrue = c.querySelectorAll('video[autoplay="true"]')
   let autoplayAutoplay = c.querySelectorAll('video[autoplay="autoplay"]')
   let autoplayOn = c.querySelectorAll('video[autoplay="on"]')
@@ -266,15 +257,14 @@ function injectHTML (htmlString, options) {
   if (options && options.wrapper === false) {
     return html([htmlString])
   }
-  return html([`<div>${htmlString}</div>`])//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return html([`<div>${htmlString}</div>`]) // using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function injectMarkdown (mdString, options) {
-  return injectHTML(entities.decode(marked(mdString)), options)//using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return injectHTML(entities.decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function cache (c, args) {
-
   if (typeof window === 'undefined') {
     return c(args)
   }
@@ -312,12 +302,43 @@ function getRouteComponent (pathname) {
   return foundRoute && foundRoute.component
 }
 
-export default function (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, history = historyModule} = {}) {
-  //this default function is used for setting up client side and is not run on the server
-  ({components, postUpdate, el} = config)
+function getSymbol(ob, symbolName){
+  let symbols = Object.getOwnPropertySymbols(ob)
+  if (symbols.length) {
+    return symbols.find(symb => symb.toString().includes(`Symbol(${symbolName})`))
+  }
+}
+
+function addToHoldingPen(holdingPen, addition){
+  let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
+  let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
+  let additionValid = addition[getSymbol(addition, 'valid')]
+  let additionTouched = addition[getSymbol(addition, 'touched')]
+  let additionWithoutSymbols = {}
+  Object.keys(addition).forEach(ad => {
+    additionWithoutSymbols[ad] = addition[ad]
+  })
+  Object.assign(currentValid, additionValid)
+  Object.assign(currentTouched, additionTouched)
+  Object.assign(holdingPen, additionWithoutSymbols)
+}
+
+function removeFromHoldingPen(holdingPen, removal){
+  let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
+  let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
+  removal.forEach(key => {
+    delete currentValid[key]
+    delete currentTouched[key]
+    delete holdingPen[key]
+  })
+}
+
+export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, history = historyModule} = {}) => {
+  //this default function is used for setting up client side and is not run on
+  // the server
+  ({components, el} = config)
 
   return new Promise((resolve, reject) => {
-
     let routesFormatted = routesArray.map(r => [
       r.path,
       (params, parts) => {
@@ -340,7 +361,7 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
           deepMerge: false
         })
 
-        document.title = parts.pathname !== '' && r.title ? `${config.baseName} - ${r.title}` : config.baseName
+        document.title = r.title || ''
 
         return r.component
 
@@ -351,7 +372,7 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
     router = shiftyRouter({default: '/404'}, routesFormatted)
 
     href(location => {
-      if(externalRoutes.includes(location.pathname)){
+      if (externalRoutes.includes(location.pathname)) {
         window.location = location.pathname
         return
       }
@@ -373,11 +394,11 @@ export default function (config, {shiftyRouter = shiftyRouterModule, href = href
       return resolve({rootEl, state})
     }
     rootEl = c
-    resolve({rootEl, state})//if no root element provided, just return the root component and the state
+    resolve({rootEl, state})//if no root element provided, just return the root
+    // component and the state
   })
 }
 
-let cd = {}//empty object for storing client dependencies (or mocks or them on the server)
 export {
   getRouteComponent,
   cache,
@@ -388,15 +409,16 @@ export {
   injectMarkdown,
   geb,
   eventEmitter,
-  cd,
   html,
   defineRoute,
   updateState,
-  emptyBody,
   formField,
   gotoRoute,
   cssTag as css,
   axios as http,
   fieldIsTouched,
-  resetTouched
+  resetTouched,
+  nextTick,
+  addToHoldingPen,
+  removeFromHoldingPen
 }
