@@ -205,9 +205,10 @@ function debounce (func) {
 
 function nextTick (func) {
   if (typeof window !== 'undefined' && window.requestAnimationFrame) {
-    return requestAnimationFrame(func)
+    window.requestAnimationFrame(func)
+  } else {
+    setTimeout(func, 17)
   }
-  setTimeout(func, 17)
 }
 
 function stateUpdated () {
