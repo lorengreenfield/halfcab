@@ -193,13 +193,21 @@ function resetTouched (holidingPen) {
 
 let waitingAlready = false
 
-function nextTick (func) {
+function debounce (func) {
   if (!waitingAlready) {
     waitingAlready = true
-    requestAnimationFrame(() => {
+    nextTick(() => {
       func()
       waitingAlready = false
     })
+  }
+}
+
+function nextTick (func) {
+  if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+    window.requestAnimationFrame(func)
+  } else {
+    setTimeout(func, 17)
   }
 }
 
@@ -223,7 +231,7 @@ function updateState (updateObject, options) {
     }
   }
 
-  nextTick(stateUpdated)
+  debounce(stateUpdated)
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('------STATE UPDATE------')

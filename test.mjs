@@ -23,16 +23,12 @@ let serverHtml = (strings, ...values) => {
 }
 
 let halfcab, ssr, html, defineRoute, gotoRoute, formField, cache, updateState, injectMarkdown, formIsValid,
-  css, state, getRouteComponent
+  css, state, getRouteComponent, nextTick
 
 function intialData (dataInitial) {
   let el = document.createElement('div')
   el.setAttribute('data-initial', dataInitial)
   document.body.appendChild(el)
-}
-
-global.requestAnimationFrame = func => {
-  func()
 }
 
 describe('halfcab', () => {
@@ -53,7 +49,8 @@ describe('halfcab', () => {
         injectMarkdown,
         formIsValid,
         css,
-        getRouteComponent
+        getRouteComponent,
+        nextTick
       } = halfcabModule)
       halfcab = halfcabModule.default
     })
@@ -88,7 +85,8 @@ describe('halfcab', () => {
         injectMarkdown,
         formIsValid,
         css,
-        getRouteComponent
+        getRouteComponent,
+        nextTick
       } = halfcabModule)
       halfcab = halfcabModule.default
     })
@@ -121,15 +119,19 @@ describe('halfcab', () => {
         })
     })
 
-    it('updating state causes a rerender with state', () => {
-      return halfcab({
+    it('updating state causes a rerender with state', (done) => {
+      halfcab({
         components (args) {
           return html`<div>${args.testing || ''}</div>`
         }
       })
         .then(({rootEl, state}) => {
           updateState({testing: 'works'})
-          expect(rootEl.innerHTML.includes('works')).to.be.true()
+          nextTick(()=> {
+            expect(rootEl.innerHTML.includes('works')).to.be.true()
+            done()
+          })
+
         })
     })
 
