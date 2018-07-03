@@ -37,7 +37,7 @@
   "devDependencies": {
     "@std/esm": "^0.26.0",
     "chai": "^4.1.2",
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.2",
     "dirty-chai": "^2.0.1",
     "esm": "^3.0.14",
     "jsdom": "^11.5.1",
