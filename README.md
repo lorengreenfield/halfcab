@@ -217,7 +217,8 @@ geb.on('fieldUpdate', (newValue, state) => {
       }
   }, {
     deepMerge: false, // deep merging on by default, set to false to overwrite whole objects without merging
-    arrayMerge: false // if deep merging then arrays will also merge by default. Set to false to not merge arrays.
+    arrayMerge: false, // if deep merging then arrays will also merge by default. Set to false to not merge arrays.,
+    rerender: false // if you want to control rerendering yourself (if you want to wait to async functions to complete) then set rerender to false and call the rerender() function later on when you're ready
   })
 })
 

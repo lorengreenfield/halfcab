@@ -211,7 +211,10 @@ function nextTick (func) {
   }
 }
 
-function stateUpdated () {
+function stateUpdated (oldEl, newEl) {
+  if (oldEl && newEl) {
+    return update(oldEl, newEl)
+  }
   rootEl && update(rootEl, components(state))
 }
 
@@ -231,6 +234,10 @@ function updateState (updateObject, options) {
     }
   }
 
+  if (options && options.rerender === false) {
+    return
+  }
+
   debounce(stateUpdated)
 
   if (process.env.NODE_ENV !== 'production') {
@@ -240,7 +247,6 @@ function updateState (updateObject, options) {
     console.log('------NEW STATE------')
     console.log(state)
     console.log('  ')
-
   }
 }
 
