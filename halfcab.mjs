@@ -231,6 +231,10 @@ function updateState (updateObject, options) {
     }
   }
 
+  if (options && options.rerender === false) {
+    return
+  }
+
   debounce(stateUpdated)
 
   if (process.env.NODE_ENV !== 'production') {
@@ -240,7 +244,6 @@ function updateState (updateObject, options) {
     console.log('------NEW STATE------')
     console.log(state)
     console.log('  ')
-
   }
 }
 
@@ -310,14 +313,15 @@ function getRouteComponent (pathname) {
   return foundRoute && foundRoute.component
 }
 
-function getSymbol(ob, symbolName){
+function getSymbol (ob, symbolName) {
   let symbols = Object.getOwnPropertySymbols(ob)
   if (symbols.length) {
-    return symbols.find(symb => symb.toString().includes(`Symbol(${symbolName})`))
+    return symbols.find(symb => symb.toString()
+      .includes(`Symbol(${symbolName})`))
   }
 }
 
-function addToHoldingPen(holdingPen, addition){
+function addToHoldingPen (holdingPen, addition) {
   let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
   let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
   let additionValid = addition[getSymbol(addition, 'valid')]
@@ -331,7 +335,7 @@ function addToHoldingPen(holdingPen, addition){
   Object.assign(holdingPen, additionWithoutSymbols)
 }
 
-function removeFromHoldingPen(holdingPen, removal){
+function removeFromHoldingPen (holdingPen, removal) {
   let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
   let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
   removal.forEach(key => {

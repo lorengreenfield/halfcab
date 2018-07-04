@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/lorengreenfield/halfcab
+    parallelism: 1
+    shell: /bin/bash --login
+    docker:
+    - image: circleci/node:8.11.3
+      command: /sbin/init
+    steps:
+    - checkout
+    - run: export PATH="~/lorengreenfield/halfcab/node_modules/.bin:$PATH"
+    - run: npm install
+    - run: npm run test:coveralls

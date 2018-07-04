@@ -382,27 +382,37 @@ describe('halfcab', () => {
         .true()
     })
 
-    it(`Doesn't clone when merging`, () => {
-      let myObject = {
-        test: 1,
-        fake: 'String2'
-      }
-
-      updateState({
-        myObject
+    it(`Doesn't clone when merging`, (done) => {
+      halfcab({
+        components () {
+          return html `<div></div>`
+        }
       })
-
-      setTimeout(() => {
-        updateState({
-          myObject: {
-            test: 2
+        .then(({rootEl, state}) => {
+          let myObject = {
+            test: 1,
+            fake: 'String2'
           }
+          updateState({
+            myObject
+          })
+
+          nextTick(() => {
+            state.myObject.test = 2
+            updateState({
+              myOtherObject: {
+                test: 1,
+                fake: 'String2'
+              }
+            })
+
+            nextTick(() => {
+              expect(state.myObject.test).to.equal(2)
+              expect(myObject.test).to.equal(2)
+              done()
+            }, 20)
+          })
         })
-
-        expect(myObject.test).to.equal(2)
-      })
-
     })
-
   })
 })

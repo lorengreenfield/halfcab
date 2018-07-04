@@ -1,7 +1,0 @@
-machine:
-  node:
-    version: 8.9.3
-
-test:
-  post:
-    - npm run coveralls
