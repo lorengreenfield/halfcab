@@ -1,13 +1,13 @@
 {
   "name": "halfcab",
-  "version": "10.0.4",
+  "version": "10.1.0",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
   "module": "halfcab.mjs",
   "jsnext:main": "halfcab.mjs",
   "esm": true,
   "scripts": {
-    "test": "mocha --require @std/esm test.mjs **/test.mjs",
+    "test": "ESM_OPTIONS={cjs:true} mocha --require @std/esm test.mjs **/test.mjs",
     "test:coverage": "nyc --reporter=html --check-coverage --lines 75 --functions 75 --branches 75 npm test",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
