@@ -5,13 +5,10 @@ jobs:
     parallelism: 1
     shell: /bin/bash --login
     docker:
-    - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
+    - image: circleci/node:8.11.3
       command: /sbin/init
     steps:
     - checkout
-    - run:
-        working_directory: ~/lorengreenfield/halfcab
-        command: nvm install 8.11.3 && nvm alias default 8.11.3
     - run: export PATH="~/lorengreenfield/halfcab/node_modules/.bin:$PATH"
     - run: npm install
     - run: npm run test:nyc
