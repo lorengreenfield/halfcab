@@ -9,7 +9,7 @@
   "scripts": {
     "test": "ESM_OPTIONS={cjs:true} mocha --require @std/esm test.mjs **/test.mjs",
     "test:coverage": "nyc --reporter=html --check-coverage --lines 75 --functions 75 --branches 75 npm test",
-    "coverage-report": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version minor --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
