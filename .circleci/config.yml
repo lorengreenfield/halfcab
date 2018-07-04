@@ -11,5 +11,4 @@ jobs:
     - checkout
     - run: export PATH="~/lorengreenfield/halfcab/node_modules/.bin:$PATH"
     - run: npm install
-    - run: npm run test:nyc
     - run: npm run test:coveralls
