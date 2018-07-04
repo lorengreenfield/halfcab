@@ -35,19 +35,19 @@
   },
   "homepage": "https://github.com/lorengreenfield/halfcab#readme",
   "devDependencies": {
+    "@std/esm": "^0.26.0",
     "chai": "^4.1.2",
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.2",
     "dirty-chai": "^2.0.1",
     "esm": "^3.0.14",
     "jsdom": "^11.5.1",
     "jsdom-global": "^3.0.2",
     "mocha": "^5.2.0",
-    "nyc": "^12.0.1",
+    "nyc": "^12.0.2",
     "sinon": "^6.1.0",
     "sinon-chai": "^3.0.0"
   },
   "dependencies": {
-    "@std/esm": "^0.26.0",
     "axios": "^0.18.0",
     "csjs-inject": "^1.0.1",
     "deepmerge": "^2.1.1",
