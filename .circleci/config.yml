@@ -14,5 +14,5 @@ jobs:
         command: nvm install 8.11.3 && nvm alias default 8.11.3
     - run: export PATH="~/lorengreenfield/halfcab/node_modules/.bin:$PATH"
     - run: npm install
-    - run: npm test
-    - run: ./node_modules/.bin/nyc npm test && ./node_modules/.bin/nyc report --reporter=text-lcov | node ./node_modules/.bin/coveralls
+    - run: npm run test:nyc
+    - run: npm run test:coveralls
