@@ -87,9 +87,21 @@ function ssr (rootComponent) {
 
 function defineRoute (routeObject) {
   if (routeObject.external) {
-    return externalRoutes.push(routeObject.path)
+    let foundRoute = externalRoutes.findIndex(route => route.path === routeObject.path)
+    if(foundRoute !== -1){
+      externalRoutes[foundRoute] = routeObject
+    } else {
+      externalRoutes.push(routeObject.path)
+    }
+    return
   }
-  routesArray.push(routeObject)
+
+  let foundRoute = routesArray.findIndex(route => route.path === routeObject.path)
+  if(foundRoute !== -1){
+    routesArray[foundRoute] = routeObject
+  } else {
+    routesArray.push(routeObject)
+  }
 }
 
 function formField (ob, prop) {
