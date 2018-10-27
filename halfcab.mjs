@@ -244,7 +244,7 @@ function updateState (updateObject, options) {
   }
 
   if (options && options.rerender === false) {
-    return
+    return Promise.resolve(state)
   }
 
   debounce(stateUpdated)
@@ -257,6 +257,12 @@ function updateState (updateObject, options) {
     console.log(state)
     console.log('  ')
   }
+
+  return new Promise(resolve => {
+    nextTick(() => {
+      resolve(state)
+    })
+  })
 }
 
 function emptySSRVideos (c) {
