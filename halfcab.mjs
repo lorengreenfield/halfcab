@@ -369,7 +369,7 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
       r.path,
       (params, parts) => {
 
-        r.callback && r.callback(Object.assign({}, parts, {params}))
+        r.callback && r.callback(Object.assign({}, parts, {params}), state)
         if (parts && window.location.pathname !== parts.pathname) {
           window.history.pushState({href: parts.href}, r.title, parts.href)
         }
