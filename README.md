@@ -169,7 +169,7 @@ Listen for an event:
 ```js
 import { geb } from 'halfcab'
 geb.on('doStuff', (passedInArgs, state) => {
-  // note that the global state is passed in as the second argument to all geb listeners
+  // note that the global state is passed in as the second argument to all geb listener callbacks
   alert('Stuff happened')
 })
 ```
@@ -382,8 +382,9 @@ halfcab tries not to force you to use a single solution for both server side and
 Create a new route:
 ```js
 import { defineRoute } from 'halfcab'
-defineRoute({path: '/reportpal', title: 'Report Pal', component: 'myPageComponent', callback(routeInfo){
-    //this callback with route info is useful for making supplementary api calls
+defineRoute({path: '/reportpal', title: 'Report Pal', component: 'myPageComponent', callback(routeInfo, state){
+    // this callback with route info is useful for making supplementary api calls
+    // state is provided as the second argument
     console.log(routeInfo) // routInfo contains params, hash, query, href, pathname
 }})
 
