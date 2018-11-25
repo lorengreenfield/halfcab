@@ -100,11 +100,11 @@ describe('halfcab', () => {
     })
 
     it('Produces an HTML element wrapping as a reusable component', () => {
-      let el = cache(() => html`
+      let el = args => html`
           <div oninput=${() => {
       }}></div>
-      `, {})
-      expect(el instanceof HTMLDivElement).to.be.true()
+      `
+      expect(el({}) instanceof HTMLDivElement).to.be.true()
     })
 
     it('Runs halfcab function without error', () => {

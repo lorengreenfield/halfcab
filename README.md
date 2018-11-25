@@ -25,7 +25,7 @@ Halfcab is no longer built as a common js distribution. The `esm` package is req
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, cache, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick } from 'halfcab'
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick, Component, LRU } from 'halfcab'
 ```
 
 ## Installation
@@ -55,10 +55,10 @@ halfcab({
 #### Components
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
-- `cache` - wrapper function to increase performance of reusable components by caching them. Use later on in your project when making performance tweaks.
+- `Component` - nanocomponent: https://www.npmjs.com/package/nanocomponent
+- `LRU` - nanolru: https://www.npmjs.com/package/nanolru
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
-
 
 Both injectHTML and injectMarkdown have a second argument for options. Currently there's just a single option:
 
@@ -135,26 +135,8 @@ export default args => html`
 Notice how you can use media queries, and inject variables using JavaScript! The CSS is scoped to your component so doesn't affect the rest of the app.
 
 
-If you want a bit of a performance boost with components that you know will be re-rendered quite often, but won't change (args passed in will always be the same), use the `cache` wrapper function. You can use this with all components except the root one. The caching uses the function and its arguments as a key, and since the root element always receives the full global state, it will never update. Don't bother using this unless you need a performance boost. Using caching relies on all state being sent through the component tree, so if you need to pull state from somewhere else other than the global state object, do it in the parent component and pass it down.
-
-```js
-import {html, formField, cache} from 'halfcab'
-
-const singleField = ({holdingPen, name, property, styles, type, required, pattern}) => html`
-  <div>
-    <input value="${holdingPen[property]}" type="${type}" oninput=${formField(holdingPen, property)} class="${styles.input}" ${required ? `required` : ''} />
-    <label>${name}</label>
-    <div></div>
-  </div>
-`
-
-export default args => cache(singleField, args)
-```
-This essentially acts as a component cache. Notice that instead of just returning your component as the default function, you're simply creating a separate constant that holds the function, and then passing that function, along with the args, into the cache wrapper function.
-
-You'll end up with slightly better performance than React (but not React Fibre) using the `cache` wrapper. See the [halfcab Sierpinski Triangle example](https://resorts-interactive.com/uiperftest.html).
-
-It's worth mentioning here a second time, **don't wrap your root component**. Everything else is fine.
+#### Performance
+For larger apps you can get a major performance boost by using the provided `Component`, and `LRU` classes. See nanocomponent and nanolru libraries for details.
 
 
 #### Events
