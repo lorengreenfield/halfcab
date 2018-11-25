@@ -366,10 +366,9 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
             query: qs.parse(parts.search),
             params,
             key: r.key || r.path,
-            href: location.href
+            href: location.href,
+            component: null
           }
-        }, {
-          deepMerge: false
         })
 
         document.title = r.title || ''
