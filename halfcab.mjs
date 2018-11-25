@@ -11,11 +11,11 @@ import marked from 'marked'
 import htmlEntities from 'html-entities'
 import eventEmitter from './eventEmitter'
 import qs from 'qs'
-import toSource from 'tosource'
+import LRU from 'nanolru'
+import Component from 'nanocomponent'
 
 const {AllHtmlEntities} = htmlEntities
 
-let componentRegistry
 let entities = new AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
@@ -40,7 +40,6 @@ function b64DecodeUnicode (str) {
 }
 
 if (typeof window !== 'undefined') {
-  componentRegistry = new Map()
   dataInitial = document.querySelector('[data-initial]')
   if (!!dataInitial) {
     state = (dataInitial && dataInitial.dataset.initial) && Object.assign({}, JSON.parse(b64DecodeUnicode(dataInitial.dataset.initial)))
@@ -224,7 +223,12 @@ function nextTick (func) {
 }
 
 function stateUpdated () {
-  rootEl && update(rootEl, components(state))
+  let startTime = Date.now()
+  let newEl = components(state)
+  console.log(`Component render: ${Date.now() - startTime}`)
+  startTime = Date.now()
+  rootEl && update(rootEl, newEl)
+  console.log(`DOM morph: ${Date.now() - startTime}`)
 }
 
 function updateState (updateObject, options) {
@@ -287,25 +291,6 @@ function injectHTML (htmlString, options) {
 
 function injectMarkdown (mdString, options) {
   return injectHTML(entities.decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
-}
-
-function cache (c, args) {
-  if (typeof window === 'undefined') {
-    return c(args)
-  }
-
-  let key = c.toString() + toSource(args)
-
-  if (!componentRegistry.has(key)) {
-
-    //not already in the registry, add it
-    let el = c(args)
-    componentRegistry.set(key, el)
-    return el
-  } else {
-    return componentRegistry.get(key)
-  }
-
 }
 
 function gotoRoute (route) {
@@ -427,7 +412,6 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
 
 export {
   getRouteComponent,
-  cache,
   stateUpdated as rerender,
   formIsValid,
   ssr,
@@ -446,5 +430,7 @@ export {
   resetTouched,
   nextTick,
   addToHoldingPen,
-  removeFromHoldingPen
+  removeFromHoldingPen,
+  Component,
+  LRU
 }
