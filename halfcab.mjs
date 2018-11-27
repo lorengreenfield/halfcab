@@ -223,12 +223,14 @@ function nextTick (func) {
 }
 
 function stateUpdated () {
-  let startTime = Date.now()
-  let newEl = components(state)
-  console.log(`Component render: ${Date.now() - startTime}`)
-  startTime = Date.now()
-  rootEl && update(rootEl, newEl)
-  console.log(`DOM morph: ${Date.now() - startTime}`)
+  if (rootEl) {
+    let startTime = Date.now()
+    let newEl = components(state)
+    console.log(`Component render: ${Date.now() - startTime}`)
+    startTime = Date.now()
+    update(rootEl, newEl)
+    console.log(`DOM morph: ${Date.now() - startTime}`)
+  }
 }
 
 function updateState (updateObject, options) {
