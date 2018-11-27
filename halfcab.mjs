@@ -409,9 +409,13 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
   })
 }
 
+function rerender () {
+  debounce(stateUpdated)
+}
+
 export {
   getRouteComponent,
-  stateUpdated as rerender,
+  rerender,
   formIsValid,
   ssr,
   injectHTML,
