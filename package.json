@@ -50,7 +50,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "csjs-inject": "^1.0.1",
-    "deepmerge": "^2.2.1",
+    "deepmerge": "^3.0.0",
     "event-emitter": "^0.3.5",
     "html-entities": "^1.2.1",
     "marked": "^0.4.0",
