@@ -25,7 +25,7 @@ Halfcab is no longer built as a common js distribution. The `esm` package is req
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick, Component, LRU } from 'halfcab'
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick, Component, LRU, PureComponent, cachedComponent } from 'halfcab'
 ```
 
 ## Installation
@@ -57,6 +57,8 @@ halfcab({
 - `css` - injects css into html component's class property
 - `Component` - nanocomponent: https://www.npmjs.com/package/nanocomponent
 - `LRU` - nanolru: https://www.npmjs.com/package/nanolru
+- `PureComponent` - Extends Component and only rerenders when arguments change
+- `cachedComponent` - pair with PureComponent to automatically cache components using LRU and only rerender when arguments change
 - `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
@@ -138,6 +140,22 @@ Notice how you can use media queries, and inject variables using JavaScript! The
 #### Performance
 For larger apps you can get a major performance boost by using the provided `Component`, and `LRU` classes. See nanocomponent and nanolru libraries for details.
 
+For convenience if you want to write pure components that are cached you can use `PureComponent` and not have to have an update method and return cached components like so:
+
+```js
+class DateTimePicker extends PureComponent {
+  createElement(args) {
+    this.myFunction = args.myFunction
+    return html`<div>Datepicker ${args.something}</div>`
+  }
+}
+export default args => cachedComponent(DateTimePicker, args, args.uniqueKey)
+
+```
+
+Make sure you have a uniqueKey (id) so that the component is properly cached and not referenced by any other call to cachedComponent
+
+In the example above, the component that matches the uniqueKey will be extracted from the cache, the new args will be compared against the previous args, and if there's a difference, it will rerender, and if not, you'll just get the existing element from the cache. Note that this does a deep compare of objects and for functions it just copies them across. So make sure that all your functions are copied to `this`. If you see the line with `this.myFunction = args.myFunction` - this is done when the element is created, but it will also automatically be run for anything argument that is a function when performing an update. This is so that if your function argument has closed over any other variables from elsewhere, it always gets the latest function, even if it's not having to rerender the element.
 
 #### Events
 - `geb` - global event bus
