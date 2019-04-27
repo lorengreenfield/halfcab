@@ -13,8 +13,11 @@ import eventEmitter from './eventEmitter'
 import qs from 'qs'
 import LRU from 'nanolru'
 import Component from 'nanocomponent'
+import * as deepDiff from 'deep-object-diff'
+import clone from 'fast-clone'
 
 const {AllHtmlEntities} = htmlEntities
+const cache = LRU(5000)
 
 let entities = new AllHtmlEntities()
 let cssTag = cssInject
@@ -415,6 +418,40 @@ function rerender () {
   debounce(stateUpdated)
 }
 
+class PureComponent extends Component {
+  createElement (args) {
+    this.args = clone(args)
+    super.createElement(args)
+  }
+
+  update (args) {
+    let diff = deepDiff.diff(this.args, args)
+    Object.keys(diff).forEach(key => {
+      if (typeof diff[key] === 'function') {
+        this[key] = args[key]
+      }
+    })
+    return !!Object.keys(diff).find(key => typeof diff[key] !== 'function')
+  }
+}
+
+function cachedComponent (Class, args, id) {
+  let instance
+  if (id) {
+    let found = cache.get(id)
+    if (found) {
+      instance = found
+    } else {
+      instance = new Class()
+      cache.set(id, instance)
+    }
+    return instance.render(args)
+  } else {
+    instance = new Class()
+    return instance.createElement(args)
+  }
+}
+
 export {
   getRouteComponent,
   rerender,
@@ -437,5 +474,7 @@ export {
   addToHoldingPen,
   removeFromHoldingPen,
   Component,
-  LRU
+  LRU,
+  cachedComponent,
+  PureComponent
 }
