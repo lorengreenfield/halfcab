@@ -13,7 +13,7 @@ import eventEmitter from './eventEmitter'
 import qs from 'qs'
 import LRU from 'nanolru'
 import Component from 'nanocomponent'
-import * as deepDiff from 'deep-object-diff'
+import deepDiff from 'deep-object-diff'
 import clone from 'fast-clone'
 
 const {AllHtmlEntities} = htmlEntities
