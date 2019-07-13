@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "12.0.0",
+  "version": "12.0.1",
   "type": "module",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
