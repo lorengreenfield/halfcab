@@ -60,7 +60,7 @@
     "nanohtml": "^1.6.3",
     "nanolru": "^1.0.0",
     "nanomorph": "^5.4.0",
-    "qs": "^6.5.2",
+    "qs": "^6.8.0",
     "shifty-router": "^0.1.1"
   },
   "peerDependencies": {
