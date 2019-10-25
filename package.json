@@ -57,7 +57,7 @@
     "html-entities": "^1.2.1",
     "marked": "^0.7.0",
     "nanocomponent": "^6.5.2",
-    "nanohtml": "^1.6.3",
+    "nanohtml": "^1.9.0",
     "nanolru": "^1.0.0",
     "nanomorph": "^5.4.0",
     "qs": "^6.5.2",
