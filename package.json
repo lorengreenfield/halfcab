@@ -56,7 +56,7 @@
     "fast-clone": "^1.5.13",
     "html-entities": "^1.2.1",
     "marked": "^0.7.0",
-    "nanocomponent": "^6.5.2",
+    "nanocomponent": "^6.5.3",
     "nanohtml": "^1.6.3",
     "nanolru": "^1.0.0",
     "nanomorph": "^5.4.0",
