@@ -55,7 +55,7 @@
     "event-emitter": "^0.3.5",
     "fast-clone": "^1.5.13",
     "html-entities": "^1.2.1",
-    "marked": "^0.7.0",
+    "marked": "^0.8.1",
     "nanocomponent": "^6.5.2",
     "nanohtml": "^1.6.3",
     "nanolru": "^1.0.0",
