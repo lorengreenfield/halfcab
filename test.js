@@ -255,7 +255,14 @@ describe('halfcab', () => {
         }
         output(e)
 
-        expect(holdingPen.valid.test).to.exist()
+        let validFound
+        Object.getOwnPropertySymbols(holdingPen).forEach(symb => {
+          if (symb.toString().indexOf('Symbol(valid)') === 0 && holdingPen[symb]) {
+            validFound = symb
+          }
+        })
+
+        expect(validFound).to.exist()
       })
 
       it('Sets radio buttons without error', () => {
