@@ -116,7 +116,7 @@ function formField (ob, prop) {
       if (Object.getOwnPropertySymbols(ob).length > 0) {
         Object.getOwnPropertySymbols(ob).forEach(symb => {
           validFound = validFound || symb.toString().indexOf('Symbol(valid)') === 0
-          if (symb.toString().indexOf('Symbol(valid)') === 0 && ob[symb]) {
+          if (symb.toString().indexOf('Symbol(valid)') === 0 && ob[symb] !== undefined) {
             validOb = symb
           }
         })
@@ -139,7 +139,7 @@ function formField (ob, prop) {
     let touchedFound
     Object.getOwnPropertySymbols(ob).forEach(symb => {
       touchedFound = touchedFound || symb.toString().indexOf('Symbol(touched)') === 0
-      if (symb.toString().indexOf('Symbol(touched)') === 0 && ob[symb]) {
+      if (symb.toString().indexOf('Symbol(touched)') === 0 && ob[symb] !== undefined) {
         touchedOb = symb
       }
     })

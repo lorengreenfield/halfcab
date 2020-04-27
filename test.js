@@ -222,7 +222,14 @@ describe('halfcab', () => {
         }
         output(e)
 
-        expect(holdingPen.valid.test).to.exist()
+        let validFound
+        Object.getOwnPropertySymbols(holdingPen).forEach(symb => {
+          if (symb.toString().indexOf('Symbol(valid)') === 0 && holdingPen[symb] !== undefined) {
+            validFound = symb
+          }
+        })
+
+        expect(validFound).to.exist()
       })
 
       it('Runs OK if a valid object is already present', () => {
@@ -257,7 +264,7 @@ describe('halfcab', () => {
 
         let validFound
         Object.getOwnPropertySymbols(holdingPen).forEach(symb => {
-          if (symb.toString().indexOf('Symbol(valid)') === 0 && holdingPen[symb]) {
+          if (symb.toString().indexOf('Symbol(valid)') === 0 && holdingPen[symb] !== undefined) {
             validFound = symb
           }
         })
@@ -279,7 +286,14 @@ describe('halfcab', () => {
         }
         output(e)
 
-        expect(holdingPen.valid.test).to.exist()
+        let validFound
+        Object.getOwnPropertySymbols(holdingPen).forEach(symb => {
+          if (symb.toString().indexOf('Symbol(valid)') === 0 && holdingPen[symb] !== undefined) {
+            validFound = symb
+          }
+        })
+
+        expect(validFound).to.exist()
       })
 
       it('Validates a form without error', () => {
