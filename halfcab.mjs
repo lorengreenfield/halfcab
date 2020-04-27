@@ -111,27 +111,44 @@ function formField (ob, prop) {
     ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.value
     let validOb
     let touchedOb
+    let validFound
     if (!ob.valid) {
       if (Object.getOwnPropertySymbols(ob).length > 0) {
         Object.getOwnPropertySymbols(ob).forEach(symb => {
+          validFound = validFound || symb.toString().indexOf('Symbol(valid)') === 0
           if (symb.toString().indexOf('Symbol(valid)') === 0 && ob[symb]) {
             validOb = symb
           }
         })
+
+        if(!validFound){
+          const symb = Symbol('valid')
+          ob[symb] = {}
+          validOb = symb
+        }
       } else {
-        ob.valid = {}
-        validOb = 'valid'
+        const symb = Symbol('valid')
+        ob[symb] = {}
+        validOb = symb
       }
 
     } else {
       validOb = 'valid'
     }
 
+    let touchedFound
     Object.getOwnPropertySymbols(ob).forEach(symb => {
+      touchedFound = touchedFound || symb.toString().indexOf('Symbol(touched)') === 0
       if (symb.toString().indexOf('Symbol(touched)') === 0 && ob[symb]) {
         touchedOb = symb
       }
     })
+
+    if(!touchedFound){
+      const symb = Symbol('touched')
+      ob[symb] = {}
+      touchedOb = symb
+    }
 
     if (touchedOb) {
       if (!ob[touchedOb][prop]) {
