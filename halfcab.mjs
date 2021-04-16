@@ -438,7 +438,6 @@ function rerender () {
 class PureComponent extends Component {
   createElement (args) {
     this.args = clone(args)
-    super.createElement(args)
   }
 
   update (args) {
