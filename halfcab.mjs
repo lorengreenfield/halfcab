@@ -360,9 +360,17 @@ function removeFromHoldingPen (holdingPen, removal) {
   let currentValid = holdingPen[getSymbol(holdingPen, 'valid')]
   let currentTouched = holdingPen[getSymbol(holdingPen, 'touched')]
   removal.forEach(key => {
-    delete currentValid[key]
-    delete currentTouched[key]
-    delete holdingPen[key]
+    if(currentValid){
+      delete currentValid[key]
+    }
+
+    if(currentTouched){
+      delete currentTouched[key]
+    }
+
+    if(holdingPen){
+      delete holdingPen[key]
+    }
   })
 }
 
