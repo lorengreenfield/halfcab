@@ -8,7 +8,7 @@ import axios from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
 import marked from 'marked'
-import htmlEntities from 'html-entities'
+import { decode } from 'html-entities'
 import eventEmitter from './eventEmitter'
 import qs from 'qs'
 import LRU from 'nanolru'
@@ -18,7 +18,6 @@ import clone from 'fast-clone'
 
 const cache = LRU(5000)
 
-let entities = new htmlEntities.AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
@@ -311,7 +310,7 @@ function injectHTML (htmlString, options) {
 }
 
 function injectMarkdown (mdString, options) {
-  return injectHTML(entities.decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return injectHTML(decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
 }
 
 function gotoRoute (route) {
