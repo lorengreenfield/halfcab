@@ -16,10 +16,9 @@ import Component from 'nanocomponent'
 import * as deepDiff from 'deep-object-diff'
 import clone from 'fast-clone'
 
-const {AllHtmlEntities} = htmlEntities
 const cache = LRU(5000)
 
-let entities = new AllHtmlEntities()
+let entities = new htmlEntities.AllHtmlEntities()
 let cssTag = cssInject
 let componentCSSString = ''
 let routesArray = []
