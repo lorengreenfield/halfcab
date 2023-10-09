@@ -5,7 +5,7 @@ jobs:
     parallelism: 1
     shell: /bin/bash --login
     docker:
-    - image: circleci/node:12.16.1
+    - image: circleci/node:18.18.0
     steps:
     - checkout
     - run: export PATH="~/lorengreenfield/halfcab/node_modules/.bin:$PATH"
