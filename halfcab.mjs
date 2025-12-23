@@ -75,7 +75,7 @@ let html = (strings, ...values) => {
     // Check if it's a CSJS object (has custom toString and isn't a TemplateResult)
     // TemplateResult usually has 'strings' and 'values' or '_$litType$'
     // DirectiveResult (unsafeHTML) uses default toString, so we shouldn't call it.
-    if (value && typeof value.toString === 'function' && value.toString !== Object.prototype.toString && !value.strings && !value._$litType$) {
+    if (value && typeof value !== 'function' && !Array.isArray(value) && typeof value.toString === 'function' && value.toString !== Object.prototype.toString && !value.strings && !value._$litType$) {
       return value.toString()
     }
     return value
