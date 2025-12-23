@@ -2,8 +2,11 @@ import shiftyRouterModule from 'shifty-router'
 import hrefModule from 'shifty-router/href.js'
 import historyModule from 'shifty-router/history.js'
 import createLocation from 'shifty-router/create-location.js'
-import bel from 'nanohtml'
-import update from 'nanomorph'
+import { html as litHtml, render, nothing, noChange } from 'lit-html'
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js'
+import { repeat } from 'lit-html/directives/repeat.js'
+import { classMap } from 'lit-html/directives/class-map.js'
+import { styleMap } from 'lit-html/directives/style-map.js'
 import axios from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
@@ -11,12 +14,9 @@ import marked from 'marked'
 import { decode } from 'html-entities'
 import eventEmitter from './eventEmitter/index.mjs'
 import qs from 'qs'
-import LRU from 'nanolru'
-import Component from 'nanocomponent'
 import * as deepDiff from 'deep-object-diff'
 import clone from 'fast-clone'
-
-const cache = LRU(5000)
+import LRU from 'nanolru'
 
 let cssTag = cssInject
 let componentCSSString = ''
@@ -28,6 +28,7 @@ let rootEl
 let components
 let dataInitial
 let el
+let componentIndex = 0
 
 marked.setOptions({
   breaks: true
@@ -69,19 +70,96 @@ if (typeof window !== 'undefined') {
 let geb = new eventEmitter({state})
 
 let html = (strings, ...values) => {
-  // fix for allowing csjs to coexist with nanohtml SSR
+  // fix for allowing csjs to coexist with lit-html
   values = values.map(value => {
-    if (value && value.hasOwnProperty('toString')) {
+    // Check if it's a CSJS object (has custom toString and isn't a TemplateResult)
+    // TemplateResult usually has 'strings' and 'values' or '_$litType$'
+    // DirectiveResult (unsafeHTML) uses default toString, so we shouldn't call it.
+    if (value && typeof value !== 'function' && !Array.isArray(value) && typeof value.toString === 'function' && value.toString !== Object.prototype.toString && !value.strings && !value._$litType$) {
       return value.toString()
     }
     return value
   })
 
-  return bel(strings, ...values)
+  return litHtml(strings, ...values)
+}
+
+// Capture directive classes for SSR identification
+const RepeatDirective = repeat([], () => {})['_$litDirective$']
+const ClassMapDirective = classMap({})['_$litDirective$']
+const StyleMapDirective = styleMap({})['_$litDirective$']
+
+function resolveTemplate (value) {
+  if (value === nothing || value === noChange) {
+    return ''
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(resolveTemplate).join('')
+  }
+  if (value && typeof value === 'object') {
+    if (value.strings) {
+      let result = ''
+      const { strings, values } = value
+      for (let i = 0; i < strings.length; i++) {
+        result += strings[i]
+        if (i < values.length) {
+          result += resolveTemplate(values[i])
+        }
+      }
+      return result
+    }
+
+    if (value['_$litDirective$']) {
+      const directiveClass = value['_$litDirective$']
+      if (directiveClass.directiveName === 'unsafeHTML' && value.values && value.values.length > 0) {
+        return String(value.values[0])
+      }
+
+      if (directiveClass === RepeatDirective) {
+        const items = value.values[0]
+        const templateFn = value.values[value.values.length - 1]
+        if (items && typeof templateFn === 'function') {
+          return Array.from(items).map((item, index) => resolveTemplate(templateFn(item, index))).join('')
+        }
+        return ''
+      }
+
+      if (directiveClass === ClassMapDirective) {
+        const classObj = value.values[0]
+        if (typeof classObj === 'object') {
+          return Object.keys(classObj)
+            .filter(key => classObj[key])
+            .join(' ')
+        }
+        return ''
+      }
+
+      if (directiveClass === StyleMapDirective) {
+        const styleObj = value.values[0]
+        if (typeof styleObj === 'object') {
+          return Object.keys(styleObj)
+            .map(key => `${key}:${styleObj[key]}`)
+            .join(';')
+        }
+        return ''
+      }
+    }
+  }
+
+  if (typeof value === 'function') {
+    return ''
+  }
+
+  return value === undefined || value === null ? '' : String(value)
 }
 
 function ssr (rootComponent) {
-  let componentsString = `${rootComponent}`
+  // Simple fallback for SSR since lit-html produces objects
+  let componentsString = ''
+  try {
+      componentsString = resolveTemplate(rootComponent)
+  } catch (e) {}
   return {componentsString, stylesString: componentCSSString}
 }
 
@@ -242,11 +320,12 @@ function nextTick (func) {
 
 function stateUpdated () {
   if (rootEl) {
+    componentIndex = 0
     let startTime = Date.now()
     let newEl = components(state)
     console.log(`Component render: ${Date.now() - startTime}`)
     startTime = Date.now()
-    update(rootEl, newEl)
+    render(newEl, rootEl)
     console.log(`DOM morph: ${Date.now() - startTime}`)
   }
 }
@@ -288,6 +367,7 @@ function updateState (updateObject, options) {
 function emptySSRVideos (c) {
   //SSR videos with source tags don't like morphing and you get double audio,
   // so remove src from the new one so it never starts
+  if (!c || !c.querySelectorAll) return
   let autoplayTrue = c.querySelectorAll('video[autoplay="true"]')
   let autoplayAutoplay = c.querySelectorAll('video[autoplay="autoplay"]')
   let autoplayOn = c.querySelectorAll('video[autoplay="on"]')
@@ -304,13 +384,13 @@ function emptySSRVideos (c) {
 
 function injectHTML (htmlString, options) {
   if (options && options.wrapper === false) {
-    return html([htmlString])
+    return unsafeHTML(htmlString)
   }
-  return html([`<div>${htmlString}</div>`]) // using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return html`<div>${unsafeHTML(htmlString)}</div>`
 }
 
 function injectMarkdown (mdString, options) {
-  return injectHTML(decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return injectHTML(decode(marked(mdString)), options)
 }
 
 function gotoRoute (route) {
@@ -422,16 +502,24 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
       gotoRoute(location.href)
     })
 
+    componentIndex = 0
     let c = components(state)//root element generated by components
     if (el) {
 
-      emptySSRVideos(c)
+      // emptySSRVideos(c)
 
       let r = document.querySelector(el)
-      rootEl = update(r, c)
+      if (!r) {
+        // Fallback if element not found
+        rootEl = document.createElement('div')
+      } else {
+        rootEl = r
+      }
+      render(c, rootEl)
       return resolve({rootEl, state})
     }
-    rootEl = c
+    rootEl = document.createElement('div')
+    render(c, rootEl)
     resolve({rootEl, state})//if no root element provided, just return the root
     // component and the state
   })
@@ -441,38 +529,19 @@ function rerender () {
   debounce(stateUpdated)
 }
 
-class PureComponent extends Component {
-  createElement (args) {
-    this.args = clone(args)
-  }
-
-  update (args) {
-    let diff = deepDiff.diff(this.args, args)
-    Object.keys(diff).forEach(key => {
-      if (typeof diff[key] === 'function') {
-        this[key] = args[key]
-      }
-    })
-    return !!Object.keys(diff).find(key => typeof diff[key] !== 'function')
+class Component {
+  render(args) {
+    if (this.createElement) return this.createElement(args)
+    return html``
   }
 }
+
+class PureComponent extends Component {}
 
 function cachedComponent (Class, args, id) {
-  let instance
-  if (id) {
-    let found = cache.get(id)
-    if (found) {
-      instance = found
-    } else {
-      instance = new Class()
-      cache.set(id, instance)
-    }
-    return instance.render(args)
-  } else {
-    instance = new Class()
-    return instance.createElement(args)
-  }
+  return new Class().render(args)
 }
+
 
 export {
   getRouteComponent,
