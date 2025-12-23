@@ -2,8 +2,11 @@ import shiftyRouterModule from 'shifty-router'
 import hrefModule from 'shifty-router/href.js'
 import historyModule from 'shifty-router/history.js'
 import createLocation from 'shifty-router/create-location.js'
-import { html as litHtml, render } from 'lit-html'
+import { html as litHtml, render, nothing, noChange } from 'lit-html'
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js'
+import { repeat } from 'lit-html/directives/repeat.js'
+import { classMap } from 'lit-html/directives/class-map.js'
+import { styleMap } from 'lit-html/directives/style-map.js'
 import axios from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
@@ -81,7 +84,16 @@ let html = (strings, ...values) => {
   return litHtml(strings, ...values)
 }
 
+// Capture directive classes for SSR identification
+const RepeatDirective = repeat([], () => {})['_$litDirective$']
+const ClassMapDirective = classMap({})['_$litDirective$']
+const StyleMapDirective = styleMap({})['_$litDirective$']
+
 function resolveTemplate (value) {
+  if (value === nothing || value === noChange) {
+    return ''
+  }
+
   if (Array.isArray(value)) {
     return value.map(resolveTemplate).join('')
   }
@@ -99,12 +111,46 @@ function resolveTemplate (value) {
     }
 
     if (value['_$litDirective$']) {
-      const directive = value['_$litDirective$']
-      if (directive.directiveName === 'unsafeHTML' && value.values && value.values.length > 0) {
+      const directiveClass = value['_$litDirective$']
+      if (directiveClass.directiveName === 'unsafeHTML' && value.values && value.values.length > 0) {
         return String(value.values[0])
+      }
+
+      if (directiveClass === RepeatDirective) {
+        const items = value.values[0]
+        const templateFn = value.values[value.values.length - 1]
+        if (items && typeof templateFn === 'function') {
+          return Array.from(items).map((item, index) => resolveTemplate(templateFn(item, index))).join('')
+        }
+        return ''
+      }
+
+      if (directiveClass === ClassMapDirective) {
+        const classObj = value.values[0]
+        if (typeof classObj === 'object') {
+          return Object.keys(classObj)
+            .filter(key => classObj[key])
+            .join(' ')
+        }
+        return ''
+      }
+
+      if (directiveClass === StyleMapDirective) {
+        const styleObj = value.values[0]
+        if (typeof styleObj === 'object') {
+          return Object.keys(styleObj)
+            .map(key => `${key}:${styleObj[key]}`)
+            .join(';')
+        }
+        return ''
       }
     }
   }
+
+  if (typeof value === 'function') {
+    return ''
+  }
+
   return value === undefined || value === null ? '' : String(value)
 }
 
