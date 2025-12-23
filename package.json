@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "13.0.9",
+  "version": "15.0.0",
   "type": "module",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
@@ -11,7 +11,7 @@
     "test:coverage": "c8 --reporter=html --check-coverage --lines 75 --functions 75 --branches 75 npm test",
     "test:coveralls": "c8 npm test && c8 report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
-    "versionbump:feature": "npm version minor --no-git-tag-version",
+    "versionbump:feature": "npm version major --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
     "npm-publish": "npm publish"
   },
