@@ -1,13 +1,13 @@
 {
   "name": "halfcab",
-  "version": "13.0.9",
+  "version": "14.0.0",
   "type": "module",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
   "module": "halfcab.mjs",
   "jsnext:main": "halfcab.mjs",
   "scripts": {
-    "test": "mocha --experimental-modules --es-module-specifier-resolution=node --experimental-json-modules './{,!(node_modules)/**}/test.js'",
+    "test": "mocha './{,!(node_modules)/**}/test.js'",
     "test:coverage": "c8 --reporter=html --check-coverage --lines 75 --functions 75 --branches 75 npm test",
     "test:coveralls": "c8 npm test && c8 report --reporter=text-lcov | coveralls",
     "versionbump:fix": "npm version patch --no-git-tag-version",
@@ -54,6 +54,7 @@
     "event-emitter": "^0.3.5",
     "fast-clone": "^1.5.13",
     "html-entities": "^2.3.2",
+    "lit-html": "^3.3.1",
     "marked": "^0.7.0",
     "nanocomponent": "^6.5.2",
     "nanohtml": "^1.6.3",
