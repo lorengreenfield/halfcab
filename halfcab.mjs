@@ -85,16 +85,25 @@ function resolveTemplate (value) {
   if (Array.isArray(value)) {
     return value.map(resolveTemplate).join('')
   }
-  if (value && typeof value === 'object' && value.strings) {
-    let result = ''
-    const { strings, values } = value
-    for (let i = 0; i < strings.length; i++) {
-      result += strings[i]
-      if (i < values.length) {
-        result += resolveTemplate(values[i])
+  if (value && typeof value === 'object') {
+    if (value.strings) {
+      let result = ''
+      const { strings, values } = value
+      for (let i = 0; i < strings.length; i++) {
+        result += strings[i]
+        if (i < values.length) {
+          result += resolveTemplate(values[i])
+        }
+      }
+      return result
+    }
+
+    if (value['_$litDirective$']) {
+      const directive = value['_$litDirective$']
+      if (directive.directiveName === 'unsafeHTML' && value.values && value.values.length > 0) {
+        return String(value.values[0])
       }
     }
-    return result
   }
   return value === undefined || value === null ? '' : String(value)
 }
