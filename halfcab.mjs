@@ -13,6 +13,7 @@ import eventEmitter from './eventEmitter/index.mjs'
 import qs from 'qs'
 import * as deepDiff from 'deep-object-diff'
 import clone from 'fast-clone'
+import LRU from 'nanolru'
 
 let cssTag = cssInject
 let componentCSSString = ''
@@ -80,11 +81,29 @@ let html = (strings, ...values) => {
   return litHtml(strings, ...values)
 }
 
+function resolveTemplate (value) {
+  if (Array.isArray(value)) {
+    return value.map(resolveTemplate).join('')
+  }
+  if (value && typeof value === 'object' && value.strings) {
+    let result = ''
+    const { strings, values } = value
+    for (let i = 0; i < strings.length; i++) {
+      result += strings[i]
+      if (i < values.length) {
+        result += resolveTemplate(values[i])
+      }
+    }
+    return result
+  }
+  return value === undefined || value === null ? '' : String(value)
+}
+
 function ssr (rootComponent) {
   // Simple fallback for SSR since lit-html produces objects
   let componentsString = ''
   try {
-      componentsString = String(rootComponent)
+      componentsString = resolveTemplate(rootComponent)
   } catch (e) {}
   return {componentsString, stylesString: componentCSSString}
 }
@@ -468,7 +487,6 @@ function cachedComponent (Class, args, id) {
   return new Class().render(args)
 }
 
-function LRU () {}
 
 export {
   getRouteComponent,
