@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "15.0.1",
+  "version": "15.0.5",
   "type": "module",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
@@ -13,7 +13,8 @@
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version major --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
-    "npm-publish": "npm publish --tag beta"
+    "npm-publish": "npm publish --tag beta",
+    "start:example": "npx --yes serve . -l 5173"
   },
   "repository": {
     "type": "git",
@@ -47,6 +48,8 @@
     "sinon-chai": "^3.0.0"
   },
   "dependencies": {
+    "@lit-labs/ssr": "^4.0.0",
+    "@lit-labs/ssr-client": "^1.1.8",
     "axios": "^0.26.1",
     "csjs-inject": "^1.0.1",
     "deep-object-diff": "^1.1.0",
@@ -54,11 +57,8 @@
     "event-emitter": "^0.3.5",
     "fast-clone": "^1.5.13",
     "html-entities": "^2.3.2",
+    "lit": "^3.3.2",
     "marked": "^0.7.0",
-    "nanocomponent": "^6.5.2",
-    "nanohtml": "^1.6.3",
-    "nanolru": "^1.0.0",
-    "nanomorph": "^5.4.0",
     "qs": "^6.5.2",
     "shifty-router": "^0.1.1"
   },
