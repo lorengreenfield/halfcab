@@ -1,6 +1,6 @@
 {
   "name": "halfcab",
-  "version": "15.0.8",
+  "version": "15.0.9",
   "type": "module",
   "description": "A simple universal JavaScript framework focused on making use of es2015 template strings to build components.",
   "main": "halfcab.mjs",
@@ -13,7 +13,7 @@
     "versionbump:fix": "npm version patch --no-git-tag-version",
     "versionbump:feature": "npm version major --no-git-tag-version",
     "versionbump:breakingchanges": "npm version major --no-git-tag-version",
-    "npm-publish": "npm publish --tag beta",
+    "npm-publish": "npm publish",
     "start:example": "npx --yes serve . -l 5173"
   },
   "repository": {
