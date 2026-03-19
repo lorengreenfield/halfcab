@@ -359,9 +359,9 @@ function emptySSRVideos (c) {
 
 function injectHTML (htmlString, options) {
   if (options && options.wrapper === false) {
-    return html([htmlString])
+    return unsafeHTML(htmlString)
   }
-  return html([`<div>${htmlString}</div>`])
+  return html`<div>${unsafeHTML(htmlString)}</div>`
 }
 
 function injectMarkdown (mdString, options) {

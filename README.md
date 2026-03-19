@@ -25,7 +25,7 @@ Halfcab is no longer built as a common js distribution.
 halfcab exposes a bunch of functions and objects that you import from the halfcab module. If you want to grab them all at once ( you don't ), it'd look like this:
 
 ```js
-import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick, Component, LRU, PureComponent, cachedComponent } from 'halfcab'
+import halfcab, { html, css, injectHTML, injectMarkdown, geb, eventEmitter, updateState, rerender, formField, formIsValid, fieldIsTouched, resetTouched, ssr, defineRoute, gotoRoute, http, getRouteComponent, nextTick } from 'halfcab'
 ```
 
 ## Installation
@@ -55,21 +55,17 @@ halfcab({
 #### Components
 - `html` - creates dom elements from template literals
 - `css` - injects css into html component's class property
-- `Component` - nanocomponent: https://www.npmjs.com/package/nanocomponent
-- `LRU` - nanolru: https://www.npmjs.com/package/nanolru
-- `PureComponent` - Extends Component and only rerenders when arguments change
-- `cachedComponent` - pair with PureComponent to automatically cache components using LRU and only rerender when arguments change
-- `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML
+- `injectHTML` - injects html from a string, much like a triple mustache or React's dangerouslySetInnerHTML. Uses lit-html's unsafeHTML
 - `injectMarkdown` - the same as `injectHTML` but first converts markdown into HTML, making sure HTML entities are not double encoded.
 
 Both injectHTML and injectMarkdown have a second argument for options. Currently there's just a single option:
 
 ```{wrapper: false}``` (default is true)
 
-By default injected html will have a wrapping `<div>`. This is to ensure an html element can successfully be made (required by nanohtml)
+By default injected html will have a wrapping `<div>`. This is to ensure an html element can successfully be made.
 If you know that your HTML already has a wrapping element, or it's just a single element, you can set the wrapper to false. Particularly useful when dealing with SVGs.
 
-Under the hood, halfcab uses nanohtml + nanomorph, which turns tagged template literals into elements, and updates the DOM.
+Under the hood, halfcab uses lit-html, which turns tagged template literals into elements, and updates the DOM.
 
 Here's an example of a simple component:
 ```js
@@ -82,7 +78,7 @@ export default args => html`
         <img src="${args.company.logo.url}" />
       </div>
   
-      <div style="width: 216px; text-align: center;" ${args.disabled ? {disabled} : ''}>        
+      <div style="width: 216px; text-align: center;" ?disabled=${args.disabled}>        
         <button onclick=${e => {
         alert('I am a button')}} 
         >Log in <i class="material-icons" style="vertical-align: inherit">account_circle</i>
@@ -93,8 +89,9 @@ export default args => html`
 `
 
 ```
-
 This is just regular HTML with one twist - Using event handlers like onclick will use the scope of your component, not the global scope. Just don't use quotation marks around it. Put it within ${ } instead.
+
+Note: As of version 15, to conditionally include html flags like `disabled`, halfcab now uses the lit-html syntax starting with a question mark, so like the example above, you'd have: `?disabled=${args.disabled}`, where we used to have the nanohtml syntax like this: `${args.disabled ? {disabled} : ''}`
 
 halfcab uses csjs for inline css, like so:
 ```js
@@ -118,7 +115,7 @@ let styles = css`
 `
 
 export default args => html`
-  <header class=${styles.header}>
+  <header class="${styles.header}">
     <nav>
       <div style="width: 280px;">
         <img src="${args.company.logo.url}" />
@@ -138,24 +135,7 @@ Notice how you can use media queries, and inject variables using JavaScript! The
 
 
 #### Performance
-For larger apps you can get a major performance boost by using the provided `Component`, and `LRU` classes. See nanocomponent and nanolru libraries for details.
-
-For convenience if you want to write pure components that are cached you can use `PureComponent` and not have to have an update method and return cached components like so:
-
-```js
-class DateTimePicker extends PureComponent {
-  createElement(args) {
-    this.myFunction = args.myFunction
-    return html`<div>Datepicker ${args.something}</div>`
-  }
-}
-export default args => cachedComponent(DateTimePicker, args, args.uniqueKey)
-
-```
-
-Make sure you have a uniqueKey (id) so that the component is properly cached and not referenced by any other call to cachedComponent
-
-In the example above, the component that matches the uniqueKey will be extracted from the cache, the new args will be compared against the previous args, and if there's a difference, it will rerender, and if not, you'll just get the existing element from the cache. Note that this does a deep compare of objects and for functions it just copies them across. So make sure that all your functions are copied to `this`. If you see the line with `this.myFunction = args.myFunction` - this is done when the element is created, but it will also automatically be run for anything argument that is a function when performing an update. This is so that if your function argument has closed over any other variables from elsewhere, it always gets the latest function, even if it's not having to rerender the element.
+From version 15 onwards, lit-html is used under the hood (replacing nanohtml and nanomorph) so the old caching system functions have been removed as lit-html is efficient out of the box. This keeps things really simple as you no longer need to provide uniqueKeys for component caching and can just use functions as there's no need for extending classes or managing a cache.
 
 #### Events
 - `geb` - global event bus
@@ -489,8 +469,6 @@ htmlTemplate.mjs
 import pack from '../../../package'
 import components from '../../../components'
 import { ssr } from 'halfcab'
-import { minify } from 'html-minifier'
-
 
 function htmlOutput(data){
   let apiData = data[0]
@@ -510,7 +488,7 @@ function htmlOutput(data){
       </head>
       <body style="padding: 0px; margin: 0px;">
       
-      ${componentsString}
+      <div id="root">${componentsString}</div>
       
       </body>
     </html>
@@ -518,10 +496,7 @@ function htmlOutput(data){
 }
 
 
-export default data => minify(htmlOutput(data), {
-  collapseWhitespace: true,
-  minifyCSS: true
-})
+export default data => htmlOutput(data)
 ```
 
 ###### Browser JS structure
@@ -550,9 +525,6 @@ halfcab({
 })
 
 ```
-Notice:
-1. This browser code is also creating an mock function to add to the cd object, but this time, it's actually importing the real someBrowserOnlyLib library and using it before returning the element.
-2. The halfcab function returns a promise that returns our root element ready for us to use.
 
 ###### The common file between server and browser - components.mjs
 
@@ -570,8 +542,8 @@ function products(products){
   }
 }
 
-export default args => cd.mock(html`
-  <div id="root" style="margin-top: 10px; text-align: center;">
+export default args => html`
+  <div style="margin-top: 10px; text-align: center;">
     ${topNav({
       company: args.company,
       products: products(args.products)
@@ -584,7 +556,7 @@ export default args => cd.mock(html`
     ${footer()}
     ${injectHTML(args.safeHTMLFromServer)}
   </div>
-`)
+`
 ```
 
 This is our top level component, from here we're also pulling in three other components - topNav, body, and footer. This is the start of the tree-like component structure.
