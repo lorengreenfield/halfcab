@@ -2,8 +2,10 @@ import shiftyRouterModule from 'shifty-router'
 import hrefModule from 'shifty-router/href.js'
 import historyModule from 'shifty-router/history.js'
 import createLocation from 'shifty-router/create-location.js'
-import bel from 'nanohtml'
-import update from 'nanomorph'
+import { html as litHtml, render } from 'lit'
+import { unsafeHTML } from 'lit/directives/unsafe-html.js'
+import { render as renderSSR } from '@lit-labs/ssr'
+import { hydrate } from '@lit-labs/ssr-client'
 import axios from 'axios'
 import cssInject from 'csjs-inject'
 import merge from 'deepmerge'
@@ -11,12 +13,6 @@ import marked from 'marked'
 import { decode } from 'html-entities'
 import eventEmitter from './eventEmitter/index.mjs'
 import qs from 'qs'
-import LRU from 'nanolru'
-import Component from 'nanocomponent'
-import * as deepDiff from 'deep-object-diff'
-import clone from 'fast-clone'
-
-const cache = LRU(5000)
 
 let cssTag = cssInject
 let componentCSSString = ''
@@ -68,20 +64,88 @@ if (typeof window !== 'undefined') {
 
 let geb = new eventEmitter({state})
 
+const stringsCache = new WeakMap()
+
 let html = (strings, ...values) => {
-  // fix for allowing csjs to coexist with nanohtml SSR
+  // fix for allowing csjs to coexist with lit-html
   values = values.map(value => {
-    if (value && value.hasOwnProperty('toString')) {
-      return value.toString()
+    if (value && value.hasOwnProperty('toString') && !value.hasOwnProperty('_$litType$')) {
+      // Check if it's a template result (lit-html object). If not, and has toString (like CSJS object), stringify it.
+      if (Array.isArray(value)) return value;
+      if (typeof value === 'object' && value !== null) {
+        if (value['_$litType$'] !== undefined) return value; // It's a TemplateResult
+        // CSJS object:
+        if (value.toString && value.toString !== Object.prototype.toString) {
+          return value.toString()
+        }
+      }
     }
     return value
   })
 
-  return bel(strings, ...values)
+  // Conversion for onEvent=${fn} to @event=${fn}
+  let newStrings = stringsCache.get(strings)
+  if (!newStrings) {
+    const newRaw = strings.raw ? [...strings.raw] : [...strings]
+    const newVals = [...strings]
+    const onEventRegex = /on([a-zA-Z]+)=$/
+
+    for (let i = 0; i < newVals.length; i++) {
+      let match = newVals[i].match(onEventRegex)
+      if (match) {
+        const eventName = match[1]
+        const replacement = `@${eventName}=`
+        newVals[i] = newVals[i].replace(onEventRegex, replacement)
+        newRaw[i] = newRaw[i].replace(onEventRegex, replacement)
+      }
+    }
+
+    newStrings = newVals
+    newStrings.raw = newRaw
+    stringsCache.set(strings, newStrings)
+  }
+
+  return litHtml(newStrings, ...values)
+}
+
+// Detect if a container likely contains Lit SSR markers so hydration is safe
+function canHydrateContainer (container) {
+  try {
+    if (!container || !container.hasChildNodes()) return false
+    // Walk comment nodes looking for lit markers inserted by @lit-labs/ssr
+    const walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_COMMENT,
+      null,
+      false
+    )
+    let n = walker.nextNode()
+    while (n) {
+      const data = (n.data || '').toLowerCase()
+      if (
+        data.includes('lit-part') ||
+        data.includes('lit$') ||
+        data.includes('lit-ssr')
+      ) {
+        return true
+      }
+      n = walker.nextNode()
+    }
+  } catch (e) {
+    // If anything goes wrong, err on the safe side and do not hydrate
+    return false
+  }
+  return false
 }
 
 function ssr (rootComponent) {
-  let componentsString = `${rootComponent}`
+  // Use @lit-labs/ssr render
+  // It returns an iterable
+  const resultIterator = renderSSR(rootComponent)
+  let componentsString = ''
+  for (const chunk of resultIterator) {
+    componentsString += chunk
+  }
   return {componentsString, stylesString: componentCSSString}
 }
 
@@ -243,11 +307,12 @@ function nextTick (func) {
 function stateUpdated () {
   if (rootEl) {
     let startTime = Date.now()
-    let newEl = components(state)
+    let newTemplate = components(state)
     console.log(`Component render: ${Date.now() - startTime}`)
     startTime = Date.now()
-    update(rootEl, newEl)
-    console.log(`DOM morph: ${Date.now() - startTime}`)
+    // Render into the container (rootEl)
+    render(newTemplate, rootEl)
+    console.log(`DOM update: ${Date.now() - startTime}`)
   }
 }
 
@@ -273,7 +338,8 @@ function updateState (updateObject, options) {
 
   debounce(stateUpdated)
 
-  if (process.env.NODE_ENV !== 'production') {
+  // Avoid referencing process in browsers without a bundler (process is undefined)
+  if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
     console.log('------STATE UPDATE------')
     console.log(updateObject)
     console.log('  ')
@@ -286,31 +352,20 @@ function updateState (updateObject, options) {
 }
 
 function emptySSRVideos (c) {
-  //SSR videos with source tags don't like morphing and you get double audio,
-  // so remove src from the new one so it never starts
-  let autoplayTrue = c.querySelectorAll('video[autoplay="true"]')
-  let autoplayAutoplay = c.querySelectorAll('video[autoplay="autoplay"]')
-  let autoplayOn = c.querySelectorAll('video[autoplay="on"]')
-  let selectors = [autoplayTrue, autoplayAutoplay, autoplayOn]
-  selectors.forEach(selector => {
-    Array.from(selector).forEach(video => {
-      video.pause()
-      Array.from(video.childNodes).forEach(source => {
-        source.src && (source.src = '')
-      })
-    })
-  })
+  // This was for nanomorph. Lit handles updates differently.
+  // If we need to manipulate DOM before render, it's harder with Templates.
+  // Leaving empty or deprecated.
 }
 
 function injectHTML (htmlString, options) {
   if (options && options.wrapper === false) {
-    return html([htmlString])
+    return unsafeHTML(htmlString)
   }
-  return html([`<div>${htmlString}</div>`]) // using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return html`<div>${unsafeHTML(htmlString)}</div>`
 }
 
 function injectMarkdown (mdString, options) {
-  return injectHTML(decode(marked(mdString)), options) //using html as a regular function instead of a tag function, and prevent double encoding of ampersands while we're at it
+  return injectHTML(decode(marked(mdString)), options)
 }
 
 function gotoRoute (route) {
@@ -376,6 +431,7 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
   //this default function is used for setting up client side and is not run on
   // the server
   ({components, el} = config)
+  let { hydrationSkipRoutes } = config
 
   return new Promise((resolve, reject) => {
     let routesFormatted = routesArray.map(r => [
@@ -422,56 +478,43 @@ export default (config, {shiftyRouter = shiftyRouterModule, href = hrefModule, h
       gotoRoute(location.href)
     })
 
-    let c = components(state)//root element generated by components
+    let c = components(state)// component template
     if (el) {
+      // rootEl is the container
+      rootEl = document.querySelector(el)
 
-      emptySSRVideos(c)
+      // Initial render. Only hydrate when container has Lit SSR markers.
+      console.log(`Hydration check. Router Key: ${state.router.key}`)
+      const shouldSkipHydration = hydrationSkipRoutes && hydrationSkipRoutes.includes(state.router.key)
 
-      let r = document.querySelector(el)
-      rootEl = update(r, c)
+      if (shouldSkipHydration) {
+        console.log(`Skipping hydration for route: ${state.router.key}`)
+        rootEl.innerHTML = ''
+      }
+
+      if (canHydrateContainer(rootEl) && !shouldSkipHydration) {
+        try {
+          hydrate(c, rootEl)
+        } catch (e) {
+          // Fallback to render if hydration fails (or if not SSR'd by Lit)
+          console.warn('Hydration failed or not applicable, falling back to render', e)
+          render(c, rootEl)
+        }
+      } else {
+        render(c, rootEl)
+      }
+
       return resolve({rootEl, state})
     }
-    rootEl = c
-    resolve({rootEl, state})//if no root element provided, just return the root
-    // component and the state
+    // If no root element provided?
+    rootEl = null
+    // We return 'c' which is now a TemplateResult.
+    resolve({rootEl: c, state})
   })
 }
 
 function rerender () {
   debounce(stateUpdated)
-}
-
-class PureComponent extends Component {
-  createElement (args) {
-    this.args = clone(args)
-  }
-
-  update (args) {
-    let diff = deepDiff.diff(this.args, args)
-    Object.keys(diff).forEach(key => {
-      if (typeof diff[key] === 'function') {
-        this[key] = args[key]
-      }
-    })
-    return !!Object.keys(diff).find(key => typeof diff[key] !== 'function')
-  }
-}
-
-function cachedComponent (Class, args, id) {
-  let instance
-  if (id) {
-    let found = cache.get(id)
-    if (found) {
-      instance = found
-    } else {
-      instance = new Class()
-      cache.set(id, instance)
-    }
-    return instance.render(args)
-  } else {
-    instance = new Class()
-    return instance.createElement(args)
-  }
 }
 
 export {
@@ -486,6 +529,7 @@ export {
   html,
   defineRoute,
   updateState,
+  state,
   formField,
   gotoRoute,
   cssTag as css,
@@ -495,8 +539,5 @@ export {
   nextTick,
   addToHoldingPen,
   removeFromHoldingPen,
-  Component,
-  LRU,
-  cachedComponent,
-  PureComponent
+  unsafeHTML
 }
