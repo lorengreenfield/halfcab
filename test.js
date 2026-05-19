@@ -377,7 +377,12 @@ describe('halfcab', () => {
 
       })
 
-      it(`Throws an error when a route doesn't exist`, () => {
+      it(`Switches to the 404 route when a route doesn't exist`, () => {
+        defineRoute({
+          path: '/404',
+          title: 'Not Found',
+          component: '404Component'
+        })
 
         return halfcab({
           el: '#root',
@@ -385,11 +390,9 @@ describe('halfcab', () => {
             return html `<div></div>`
           }
         })
-          .then(rootEl => {
-            let routing = () => {
-              gotoRoute('/thisIsAFakeRoute')
-            }
-            expect(routing).to.throw()
+          .then(({state}) => {
+            gotoRoute('/thisIsAFakeRoute')
+            expect(state.router.component).to.equal('404Component')
           })
 
       })
