@@ -170,7 +170,9 @@ function defineRoute (routeObject) {
 
 function formField (ob, prop) {
   return e => {
-    ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.type === 'number' ? Number(e.currentTarget.value) : e.currentTarget.value
+    ob[prop] = e.currentTarget.type === 'checkbox' || e.currentTarget.type === 'radio' ? e.currentTarget.checked : e.currentTarget.type === 'number'
+      ? (e.currentTarget.value === '' ? null : Number(e.currentTarget.value))
+      : e.currentTarget.value
     let validOb
     let touchedOb
     let validFound
